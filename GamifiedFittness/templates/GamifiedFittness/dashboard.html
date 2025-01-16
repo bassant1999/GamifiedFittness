@@ -1,0 +1,151 @@
+{% extends "GamifiedFittness/layout.html" %}
+
+{% block head %}
+<style>
+     #dailyUserActivityPointsChart, #dailyUserChallengePointsChart {
+        max-width: 600px; 
+        margin: 0 auto;    /* Center the chart */
+        width: 100%; 
+    }
+</style>
+{% endblock %}
+
+{% block header %} Dashboard {% endblock %}
+
+{% block body %}
+    <div id="summary" style="margin: 10px;">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card text-white bg-secondary mb-3" style="max-width: 18rem;">
+                    <div class="card-header">Total Points</div>
+                    <div class="card-body">
+                      <h5 class="card-title">10</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-danger mb-3" style="max-width: 18rem;">
+                    <div class="card-header">Total Calories</div>
+                    <div class="card-body">
+                      <h5 class="card-title">100000</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-white bg-warning mb-3" style="max-width: 18rem;">
+                    <div class="card-header">Rank</div>
+                    <div class="card-body">
+                      <h5 class="card-title">10</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="progress" style="height: 30px; margin: 15px;">
+            <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+        </div>
+    </div>
+    
+  
+
+    <div id="charts">
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="dailyUserActivityPointsChart"></canvas>
+                <div style="width:60%; margin: 0 auto;">
+                    <h6> Activities Number: <span class="text-body-secondary">{{activity_summary.count}}</span></h6>
+                    <h6> Total Points:  <span class="text-body-secondary">{{activity_summary.total_points}}</span> </h6>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <canvas id="dailyUserChallengePointsChart"></canvas>
+                <div style="width:60%; margin: 0 auto;">
+                    <h6> Total chalenges Number: <span class="text-body-secondary">{{challenge_summary.count}}</span> </h6>
+                    <h6> Total Points: <span class="text-body-secondary">{{challenge_summary.total_points}}</span> </h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <script>    
+        const activity_summary = {{ activity_summary|safe }};
+        const challenge_summary = {{ challenge_summary|safe }};
+
+        function renderChart(canvasId, labels, data, title, backgroundColor, BorderColor) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: title,
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderColor: BorderColor,
+                        borderWidth: 1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Points'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Activity Summary Chart
+        if (activity_summary.points_per_day.length === 0) {
+            document.getElementById('dailyUserActivityPointsChart').innerHTML = 'No data available for activities.';
+        } else {
+            renderChart(
+                'dailyUserActivityPointsChart',
+                activity_summary.points_per_day.map(item => item.date),
+                activity_summary.points_per_day.map(item => item.points),
+                'Total Points Per Day (Activity)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(54, 162, 235, 1)'
+            );
+        }
+
+        
+        
+        // Challenge Summary Chart
+        if (challenge_summary.points_per_day.length === 0) {
+            document.getElementById('dailyUserChallengePointsChart').innerHTML = 'No data available for challenges.';
+        } else {
+            renderChart(
+                'dailyUserChallengePointsChart',
+                challenge_summary.points_per_day.map(item => item.date),
+                challenge_summary.points_per_day.map(item => item.points),
+                'Total Points Per Day (Challenge)',
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(255, 99, 132, 1)'
+            );
+        }
+
+    </script>
+{% endblock %}

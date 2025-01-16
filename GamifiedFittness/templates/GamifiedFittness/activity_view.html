@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Activities</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>Activities <small>Management</small></h1>
+
+        <div class="btn-group">
+            <button @click="showAddModal" class="btn btn-fit-height green-jungle">
+                <i class="fa fa-plus"></i> Add Activity
+            </button>
+        </div>
+        <div v-if="arrActivities.length > 0" class="table-responsive">
+            hree
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Unit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{arrActivities}}
+                    <tr v-for="(activity, index) in arrActivities" :key="index">
+                        {{activity}}
+                        <td>{{ activity.name }}</td>
+                        <td>{{ activity.unit }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div v-else>
+            here
+            <p>No activities found.</p>
+        </div>
+
+        <!-- Modal -->
+        <div v-if="showModal">
+            <div>
+                <label>Name: </label>
+                <input v-model="newActivity.name" type="text">
+            </div>
+            <div>
+                <label>Unit: </label>
+                <input v-model="newActivity.unit" type="text">
+            </div>
+            <button @click="addActivity">Add</button>
+        </div>
+    </div>
+
+    <script>
+       const { createApp, ref, onMounted } = Vue;
+
+        const app = createApp({
+            setup() {
+                // State
+                const arrActivities = ref([]);
+                const showModal = ref(false);
+                const newActivity = ref({ name: '', unit: '' });
+
+                // Fetch CSRF token from cookies
+                const getCSRFToken = () => {
+                    return document.cookie
+                        .split('; ')
+                        .find(row => row.startsWith('csrftoken='))
+                        ?.split('=')[1];
+                };
+
+                // Fetch list of activities
+                const fetchActivities = async () => {
+                    try {
+                        const response = await fetch('/GamifiedFittness/activities/list', {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRFToken': getCSRFToken(),
+                            },
+                        });
+                        const data = await response.json();
+                        arrActivities.value = data.result ? data.object : [];
+                    } catch (error) {
+                        console.error('Error fetching activities:', error);
+                    }
+                };
+
+                // Add new activity
+                const addActivity = async () => {
+                    try {
+                        const response = await fetch('/GamifiedFittness/activities/add', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRFToken': getCSRFToken(),
+                            },
+                            body: JSON.stringify({ objActivity: newActivity.value }),
+                        });
+                        const data = await response.json();
+                        if (data.result) {
+                            alert(data.message);
+                            fetchActivities();
+                            newActivity.value = { name: '', unit: '' };
+                            showModal.value = false;
+                        } else {
+                            alert(data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error adding activity:', error);
+                    }
+                };
+
+                // Show modal
+                const showAddModal = () => {
+                    showModal.value = true;
+                };
+
+                // Lifecycle hook
+                onMounted(() => {
+                    fetchActivities();
+                });
+
+                // Return data and methods
+                return {
+                    arrActivities,
+                    showModal,
+                    newActivity,
+                    fetchActivities,
+                    addActivity,
+                    showAddModal,
+                };
+            },
+        });
+
+        // export default app;
+
+        app.mount('#app');
+    </script>
+</body>
+</html>

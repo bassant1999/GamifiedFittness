@@ -1,0 +1,131 @@
+{% extends "GamifiedFittness/layout.html" %}
+
+    {% block body %}
+        <!-- Trigger Button -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Open Modal
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Modal Title</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="response-message" class="alert d-none"></div>
+
+                        <form id="activity-form">
+                            <!-- Activity Selection -->
+                            <div class="mb-3">
+                                <label for="activity" class="form-label">Activity</label>
+                                <select id="activity" name="activity" class="form-select" required>
+                                    <option value="" disabled selected>Select an activity</option>
+                                        <option value="1">activit</option>
+                                        <option value="2">activit</option>
+                                        <option value="3">activit</option>
+                                </select>
+                            </div>
+                    
+                            <!-- Effort Input -->
+                            <div class="mb-3">
+                                <label for="effort" class="form-label">Effort</label>
+                                <input type="number" id="effort" name="effort" class="form-control" placeholder="Enter effort (e.g., minutes, meters, etc.)" required>
+                            </div>
+                    
+                            <!-- Start Date -->
+                            <div class="mb-3">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="datetime-local" id="start_date" name="start_date" class="form-control">
+                            </div>
+                    
+                            <button type="submit" class="btn btn-primary">Add Activity</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form method="GET" action="{% url 'ListActivity' %}">
+            <div class="row">
+                <!-- Name Filter -->
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="filter[name]" 
+                            value="{{ Filter.name }}" placeholder="Enter activity name">
+                    </div>
+                </div>
+                <!-- Date Filter -->
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="filter[date]" 
+                            value="{{ Filter.date }}">
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+        
+        <!-- Filter Results -->
+        <div class="mt-5">
+            <h2>Filtered Activities</h2>
+            <ul class="list-group">
+                {% for UserActivity in UserActivities %}
+                    <li class="list-group-item">
+                        <strong>{{ UserActivity.activity.name }}</strong> 
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    
+
+        <script>
+            document.getElementById('activity-form').addEventListener('submit', async function (event) {
+                event.preventDefault(); // Prevent default form submission
+        
+                const form = event.target;
+                const formData = new FormData(form);
+                const responseMessage = document.getElementById('response-message');
+        
+                try {
+                    const response = await fetch("{% url 'AddActivity' %}", {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: formData
+                    });
+        
+                    const data = await response.json();
+        
+                    if (response.ok) {
+                        responseMessage.classList.remove('d-none', 'alert-danger');
+                        responseMessage.classList.add('alert-success');
+                        responseMessage.innerText = data.message;
+        
+                        // Reset the form
+                        form.reset();
+                    } else {
+                        responseMessage.classList.remove('d-none', 'alert-success');
+                        responseMessage.classList.add('alert-danger');
+                        responseMessage.innerText = data.error || 'An error occurred.';
+                    }
+                } catch (error) {
+                    responseMessage.classList.remove('d-none', 'alert-success');
+                    responseMessage.classList.add('alert-danger');
+                    responseMessage.innerText = 'An unexpected error occurred.';
+                    console.error('Error:', error);
+                }
+            });
+        </script>
+    {% endblock %}
