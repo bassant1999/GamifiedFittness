@@ -13,6 +13,7 @@ urlpatterns = [
 
     # Chalenge
     path("chalenges", views.list_chalenge, name="list_chalenge"),
+    path("chalenges/add", views.add_chalenge, name="add_chalenge"),
     path("chalenges/<int:challenge_id>", views.view_chalenge, name="view_chalenge"),
     path("chalenges/join/<int:challenge_id>", views.join_chalenge, name="join_chalenge"),
     path("chalenges/update", views.update_user_chalenge, name="update_user_chalenge"),

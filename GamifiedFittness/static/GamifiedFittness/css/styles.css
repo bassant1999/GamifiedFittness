@@ -1,0 +1,33 @@
+
+*{
+    margin: 0 0;
+    padding: 0 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Layout */
+.header {
+    padding: 5px 15px;
+}
+/* Badges */
+.badges {
+    margin: 10px;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #545355; /* Purple for badges */
+    color: white;
+    padding: 0.8em 1em;
+    font-size: 1rem;
+    border-radius: 25px;
+    margin: 0.5em;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.badge:hover {
+    background-color: #5e35b1; /* Darker purple on hover */
+}

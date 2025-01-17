@@ -14,7 +14,9 @@ import json
 from .models import *
 from .services.user_activity import *
 from .services.user_chalenge import *
+from .services.challenge import *
 from django.forms.models import model_to_dict
+from GamifiedFittness.constants import *
 
 
 @transaction.atomic
@@ -34,19 +36,40 @@ def index(request):
         })
     challenge_summary = challenge_summary_rslt.get('data') or {"points_per_day": [], "total_points": 0, "count": 0}
 
+    #  Badges
+    user_badges = UserBadge.objects.filter(user=request.user)
+
+    #  Goal
+    goal = get_object_or_none(Goal, user=request.user)
+    formatted_goal = {}
+    if goal:
+            formatted_goal = {
+                "progress_precentage": goal.progress * 100,
+                "progress": goal.progress,
+                "calories": goal.calories
+                }
     # # Summary
     # summary = {
     #     "total_points": activity_summary.total_points + challenge_summary.total_points,
     #     "rank": 0,
     #  "calories"
     #     "Goal": 0,
-    #     "Badges":0
     # }
+
+    print(activity_summary)
+    print(challenge_summary)
+
 
     return render(request, "GamifiedFittness/dashboard.html", 
                   {
-                      'activity_summary': activity_summary,
-                      'challenge_summary': challenge_summary
+                      "summary": {
+                            'activity_summary': activity_summary,
+                            'challenge_summary': challenge_summary,
+                            "total_points": activity_summary.get('total_points') + challenge_summary.get('total_points'),
+                            "total_calories": activity_summary.get('total_calories') + challenge_summary.get('total_calories')
+                      },
+                      'user_badges': user_badges,
+                      "goal": formatted_goal
                   })
 
 def login_view(request):
@@ -69,7 +92,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("login"))
 
 
 def register(request):
@@ -113,22 +136,25 @@ def product_list_view(request):
 @login_required
 def list_activity(request):
    # Filter
-    Filter = {
+    filter = {
         'name': request.GET.get('filter[name]', ''),
         'date': request.GET.get('filter[date]', ''),
     }
     
     filter_conditions = Q(user=request.user)
-    if Filter['name']:
-        filter_conditions &= Q(activity__name__icontains=Filter['name'])
+    if filter['name']:
+        filter_conditions &= Q(activity__name__icontains=filter['name'])
 
-    if Filter['date']:
-        filter_conditions &= Q(start_date=Filter['date'])
+    if filter['date']:
+        filter_conditions &= Q(start_date=filter['date'])
 
     # Activities
-    UserActivities = UserActivity.objects.filter(filter_conditions)
+    User_activities = UserActivity.objects.filter(filter_conditions).order_by('-start_date')
 
-    return render(request, 'GamifiedFittness/activity_list.html', {'UserActivities': UserActivities, 'Filter': Filter})
+    activities = Activity.objects.filter()
+    # activity_types = [e.value for e in ActivityType]
+
+    return render(request, 'GamifiedFittness/activity_list.html', {'User_activities': User_activities, 'filter': filter, "activities": activities})
 
 
 
@@ -153,65 +179,7 @@ def add_activity(request):
         if not rslt:
             return JsonResponse({"success": False, 'message': 'Could not save the activity'}, status=400)
         
-        return JsonResponse({"success": True, 'message': 'Activity added successfully!', 'user_activity': rslt.get('data')})
-    
-        # # Validate activity existence
-        # try:
-        #     activity = Activity.objects.get(id=activity_id)
-        # except Activity.DoesNotExist:
-        #     return JsonResponse({'error': 'Selected activity does not exist.'}, status=400)
-
-        # # Create UserActivity instance
-        # user_activity = UserActivity.objects.create(
-        #     user=request.user,
-        #     activity=activity,
-        #     effort=int(effort),
-        #     start_date=start_date or now()
-        # )
-
-        # # Badge
-        # if(UserActivity.objects.filter(user=request.user).count() == 1):
-        #     # First Activity Bandge
-        #     try:
-        #         first_activity_badge = Badge.objects.get(id=1)
-        #         first_activity_user_badge = UserBadge(user=request.user, badge=first_activity_badge, date=now())
-        #         first_activity_user_badge.save()
-        #     except Badge.DoesNotExist:
-        #         # Handle the case where the badge with id=1 does not exist
-        #         return JsonResponse({'error': 'Badge not found.'}, status=404)
-        
-        # try:   
-        #     running_activity = Activity.objects.get(id=1)
-        #     total_effort = UserActivity.objects.filter(activity=running_activity).aggregate(Sum('effort'))['effort__sum'] or 0
-        #     if(total_effort >= 100):
-        #         try:
-        #             hundred_km_run_badge = Badge.objects.get(id=2)
-        #             hundred_km_run_user_badge = UserBadge(user=request.user, badge=hundred_km_run_badge, date=now())
-        #             hundred_km_run_user_badge.save()
-        #         except Badge.DoesNotExist:
-        #             # Handle the case where the badge with id=1 does not exist
-        #             return JsonResponse({'error': 'Badge not found.'}, status=404)
-
-        # except Activity.DoesNotExist:
-        #     # Handle the case where the badge with id=1 does not exist
-        #     return JsonResponse({'error': 'Activity not found.'}, status=404)
-
-
-        # # Goal
-        # try:
-        #     # get appropiate goal
-        #     goal = Goal.objects.get(Q(start_date__lte=start_date) & Q(end_date__gte=start_date))
-        #     # Update the progress
-        #     updated_progress = goal.progress + (user_activity.calories/ goal.calories)
-        #     goal.progress = min(updated_progress, 1.0)
-        #     goal.save()
-        # except Goal.DoesNotExist:
-        #     pass
-        # except Goal.MultipleObjectsReturned:
-        #      return JsonResponse({'error': 'Selected activity does not exist.'}, status=400)
-
-
-        # return JsonResponse({'message': 'Activity added successfully!', 'user_activity_id': user_activity.id})
+        return JsonResponse({"success": True, 'message': 'Activity added successfully!', 'user_activity': model_to_dict(rslt.get('data'))})
 
     return JsonResponse({'error': 'Invalid request method or type.'}, status=400)
 
@@ -235,29 +203,24 @@ def list_chalenge(request):
 def add_chalenge(request):
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         name = request.POST.get('name')
-        description = request.POST.get('description')
+        description = request.POST.get('description', None)
         points = request.POST.get('points')
         calories = request.POST.get('calories')
         start_date = request.POST.get('start_date')
         end_date = request.POST.get('end_date')
-    
 
+        # Validate
         if not name or not points or not calories or not start_date or not end_date:
             return JsonResponse({"success": False, 'message': 'Missing required parameters'}, status=400)
-        # Create Challenge instance
-        try:
-            challenge = Challenge.objects.create(
-                name=name,
-                description=description,
-                points=points,
-                calories=calories,
-                start_date=start_date,
-                end_date=end_date,
-            )
-        except Exception as e:
-            return JsonResponse({"success": False, 'message': 'Could not save the Challenge'}, status=400)
         
-        return JsonResponse({"success": True, 'message': 'Challenge added successfully!', 'challenge': challenge})
+        # Add Challenge
+        challenge_rslt = add_challenge(request.user, name, points, calories, start_date, end_date, description)
+        if(not challenge_rslt.get('success')):
+                return JsonResponse({'error': 'Could not add the challenge.'}, status=400)
+
+        challenge = challenge_rslt.get('data')
+
+        return JsonResponse({"success": True, 'message': 'Challenge added successfully!'})
     
     return JsonResponse({'error': 'Invalid request method or type.'}, status=400)
 

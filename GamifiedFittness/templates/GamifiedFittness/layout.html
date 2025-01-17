@@ -7,16 +7,18 @@
         <title>{% block title %}GamifiedFittness{% endblock %}</title>
         <!-- CSS -->
         <link rel="stylesheet" href="{% static 'GamifiedFittness/css/bootstrap.min.css' %}">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
         <link rel="stylesheet" href="{% static 'GamifiedFittness/css/styles.css' %}">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         {% block head %}{% endblock %}
          <!-- js -->
          <script src="{% static 'GamifiedFittness/js/bootstrap.bundle.min.js' %}"></script>
+         <script src="{% static 'GamifiedFittness/js/common.js' %}"></script>
          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
     <body>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="{% url 'index' %}">GamifiedFittness</a>
+        <nav class="navbar navbar-expand-lg bg-black" data-bs-theme="dark">
+            <a class="navbar-brand" href="{% url 'index' %}">💪 Fittness</a>
             <!-- Toggler for smaller screens -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -27,12 +29,6 @@
                         <a class="nav-link" href="{% url 'index' %}">Dashboard</a>
                     </li>
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'index' %}"><strong>{{ user.username }}</strong></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                        </li>
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">Log In</a>
@@ -42,13 +38,33 @@
                         </li>
                     {% endif %}
                 </ul>
+                {% if user.is_authenticated %}
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown me-4">
+                            <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Profile
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item nav-link" href="{% url 'index' %}">{{ user.username }}</a></li>
+                                <li><a class="dropdown-item nav-link" href="{% url 'list_activity' %}">My Activities</a></li>
+                                <li><a class="dropdown-item nav-link" href="">My Challenges</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item nav-link" href="{% url 'logout' %}">Log Out</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                {% endif %}
             </div>
         </nav>
         
-        <h1>{% block header %} {% endblock %}</h1>
+        <div>{% block header %} {% endblock %}</div>
+
         <div class="body">
 
             {% block body %}
+            {% endblock %}
+
+            {% block modal %}
             {% endblock %}
 
             {% block script %}

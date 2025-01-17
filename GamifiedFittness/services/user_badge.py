@@ -65,5 +65,3 @@ def check_badge_availability(user, badge_id):
         return False
     return UserBadge.objects.filter(user=user, badge=badge).exists()
 
-       
-

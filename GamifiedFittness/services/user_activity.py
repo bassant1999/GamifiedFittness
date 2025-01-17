@@ -33,7 +33,7 @@ def create_activity(user, activity_id, effort, start_date):
             return {"success": False, "message": rslt["message"]}
 
         # Goal
-        rslt = update(user, user_activity.calories)
+        rslt = update_goal_progress(user, user_activity.calories)
         if not rslt.get("success", False):
             return {"success": False, "message": rslt["message"]}
 
@@ -48,19 +48,20 @@ def get_activity_summary(user):
         .values('start_date_truncated')  # Group by start date
         .annotate(
             points=Sum('points'),  # Sum points for day
+            calories=Sum('calories'),  # Sum points for day
             count=Count('id')    # Count the activities per day
         )
         .order_by('start_date_truncated') 
     )
-    print(user_activities_summary)
     # points per day
     formatted_points_per_day = [
-        {"date": day_summary["start_date_truncated"].strftime('%Y-%m-%d'), "points": day_summary["points"]}
+        {"date": day_summary["start_date_truncated"].strftime('%Y-%m-%d'), "points": day_summary["points"], "calories": day_summary["calories"]}
         for day_summary in user_activities_summary
     ]
 
     # total points and count of activities
     total_points = sum(day_summary["points"] for day_summary in user_activities_summary)
+    total_calories = sum(day_summary["calories"] for day_summary in user_activities_summary)
     count = sum(day_summary["count"] for day_summary in user_activities_summary)
 
     # User Activity Summary
@@ -68,6 +69,6 @@ def get_activity_summary(user):
         "points_per_day": formatted_points_per_day,
         "count": count,
         "total_points": total_points,
+        "total_calories": total_calories
     }
-    print(user_activities_summary)
     return {"success": True, "data": user_activity_summary}

@@ -1,131 +1,230 @@
 {% extends "GamifiedFittness/layout.html" %}
 
-    {% block body %}
-        <!-- Trigger Button -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            Open Modal
+{% block head %}
+{% endblock %}
+
+{% block header %} 
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="header">My Activities</h1>
+        <button type="button" class="btn btn-outline-secondary m-lg-3" data-bs-toggle="modal" data-bs-target="#addActivity">
+            + Activity
         </button>
+    </div>
+{% endblock %}
 
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Modal Title</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="response-message" class="alert d-none"></div>
+{% block modal %}
+    <div class="modal fade" id="addActivity" tabindex="-1" aria-labelledby="addActivityModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addActivityModal">Add Activity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="response-message" class="alert d-none"></div>
 
-                        <form id="activity-form">
-                            <!-- Activity Selection -->
-                            <div class="mb-3">
-                                <label for="activity" class="form-label">Activity</label>
-                                <select id="activity" name="activity" class="form-select" required>
-                                    <option value="" disabled selected>Select an activity</option>
-                                        <option value="1">activit</option>
-                                        <option value="2">activit</option>
-                                        <option value="3">activit</option>
-                                </select>
+                    <form id="activity-add-form">
+                        <!-- Activity Selection -->
+                        <div class="mb-3">
+                            <label for="activity" class="form-label">Activity</label>
+                            <select id="activity" name="activity" class="form-select" onchange="activityChange(this)" required>
+                                <option value="" disabled selected>Select an activity</option>
+                                {% for activity in activities %}
+                                    <option value="{{ activity.id }}" data-unit="{{ activity.unit.name }}">{{ activity.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                
+                        <!-- Effort Input -->
+                        <div class="mb-3">
+                            <label for="effort" class="form-label">Effort</label>
+                            <div class="d-flex">
+                                <input type="number" id="effort" name="effort" class="form-control me-2" placeholder="Enter effort (e.g., minutes, meters, etc.)" required>
+                                <input type="text" id="unit" class="form-control d-none" style="width: fit-content;" disabled>
                             </div>
-                    
-                            <!-- Effort Input -->
-                            <div class="mb-3">
-                                <label for="effort" class="form-label">Effort</label>
-                                <input type="number" id="effort" name="effort" class="form-control" placeholder="Enter effort (e.g., minutes, meters, etc.)" required>
-                            </div>
-                    
-                            <!-- Start Date -->
-                            <div class="mb-3">
-                                <label for="start_date" class="form-label">Start Date</label>
-                                <input type="datetime-local" id="start_date" name="start_date" class="form-control">
-                            </div>
-                    
-                            <button type="submit" class="btn btn-primary">Add Activity</button>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save</button>
-                    </div>
+                        </div>
+                
+                        <!-- Start Date -->
+                        <div class="mb-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
+{% endblock %}
 
-        <form method="GET" action="{% url 'ListActivity' %}">
-            <div class="row">
-                <!-- Name Filter -->
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="name" name="filter[name]" 
-                            value="{{ Filter.name }}" placeholder="Enter activity name">
+{% block body %}
+    <!-- Filter -->
+    <div class="card m-4" style="width: 95%;">
+        <h2 class="card-header">Filter</h2>
+        <div class="card-body">
+            <form id="filter-activities-form" method="GET" action="{% url 'list_activity' %}">
+                <div class="row">
+                    <!-- Name Filter -->
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="filter[name]" 
+                                value="{{ filter.name }}" placeholder="Enter activity name">
+                        </div>
+                    </div>
+                    <!-- Date Filter -->
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="date" name="filter[date]" 
+                                value="{{ filter.date }}">
+                        </div>
                     </div>
                 </div>
-                <!-- Date Filter -->
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="date" class="form-label">Date</label>
-                        <input type="date" class="form-control" id="date" name="filter[date]" 
-                            value="{{ Filter.date }}">
+                <div class="d-flex justify-content-end">
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <button class="btn btn-danger" onclick="reset(event)"> Reset </button>
                     </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filter Results -->
+    <div class="border-light card m-4">
+        <h2 class="card-header">Activities</h2>
+        {% if User_activities|length > 0 %}
+            <div class="card-body">
+                <div class="d-flex flex-wrap">
+                    {% for User_activity in User_activities %}
+                        <div class="card me-5 mb-5" style="width:fit-content">
+                            <div class="card-header d-flex align-items-center">
+                                <h4> 
+                                    {% if User_activity.activity.id == 1 %}
+                                        <i class="fas fa-running"></i>
+                                    {% elif User_activity.activity.id == 2 %}
+                                        <i class="fa-solid fa-person-digging"></i>
+                                    {% elif User_activity.activity.id == 3 %}
+                                        <i class="fas fa-biking"></i>
+                                    {% elif User_activity.activity.id == 4 %}
+                                        <i class="fa-solid fa-person-walking"></i>
+                                    {% else %}
+                                        <i class="fas fa-question-circle"></i>
+                                    {% endif %}
+                                    {{ User_activity.activity.name }} 
+                                </h4> 
+                                <span class="ms-3"> {{ User_activity.effort }} {{ User_activity.activity.unit.name }} </span>
+                            </div>
+                            <div class="card-body">
+                                <span class="me-5"><i class="fas fa-fire" style="color: gold;"></i> {{ User_activity.calories }} Cal</span>
+                                <span class="me-5"><i class="fas fa-star" style="color: gold;"></i> {{ User_activity.points }} Pts</span>
+                                <p class="card-text mt-4">
+                                    <small class="d-flex justify-content-end text-muted"> 
+                                        <i class="fas fa-calendar-alt"></i>
+                                        {{ User_activity.start_date }} 
+                                    </small>
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
+        {% else %}
+            <div class="alert alert-warning m" role="alert">
+                <i class="fa-solid fa-triangle-exclamation"></i> No Activities Yet
+            </div>
+        {% endif %}
+    </div>
+   
+{% endblock %}
+
+{% block script %}
+    <script>
+
+        function activityChange(object) {
+            // Get the selected option element
+            const selectedOption = object.selectedOptions[0];
+            // update unit
+            if (selectedOption) {
+                const unit = document.getElementById('unit');
+                unit.value = selectedOption.dataset.unit;
+                unit.classList.remove('d-none');
+            }
+        }
+
+
+        function reset(event) {
+            event.preventDefault();
+            window.location.href = '{% url "list_activity" %}';
+        }
+
+
+        document.getElementById('activity-add-form').addEventListener('submit', async function (event) {
             
-            <button type="submit" class="btn btn-primary">Filter</button>
-        </form>
-        
-        <!-- Filter Results -->
-        <div class="mt-5">
-            <h2>Filtered Activities</h2>
-            <ul class="list-group">
-                {% for UserActivity in UserActivities %}
-                    <li class="list-group-item">
-                        <strong>{{ UserActivity.activity.name }}</strong> 
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-    
+            event.preventDefault(); 
 
-        <script>
-            document.getElementById('activity-form').addEventListener('submit', async function (event) {
-                event.preventDefault(); // Prevent default form submission
-        
-                const form = event.target;
-                const formData = new FormData(form);
-                const responseMessage = document.getElementById('response-message');
-        
-                try {
-                    const response = await fetch("{% url 'AddActivity' %}", {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        },
-                        body: formData
-                    });
-        
-                    const data = await response.json();
-        
-                    if (response.ok) {
-                        responseMessage.classList.remove('d-none', 'alert-danger');
-                        responseMessage.classList.add('alert-success');
-                        responseMessage.innerText = data.message;
-        
-                        // Reset the form
-                        form.reset();
-                    } else {
-                        responseMessage.classList.remove('d-none', 'alert-success');
-                        responseMessage.classList.add('alert-danger');
-                        responseMessage.innerText = data.error || 'An error occurred.';
-                    }
-                } catch (error) {
+            const form = event.target;
+            const formData = new FormData(form);
+            const responseMessage = document.getElementById('response-message');
+
+            try {
+                const response = await fetch("{% url 'add_activity' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
                     responseMessage.classList.remove('d-none', 'alert-success');
                     responseMessage.classList.add('alert-danger');
-                    responseMessage.innerText = 'An unexpected error occurred.';
-                    console.error('Error:', error);
-                }
-            });
-        </script>
-    {% endblock %}
+                    responseMessage.innerText = data.error || 'An error occurred.';
+                } 
+                window.location.href = '{% url "list_activity" %}';
+            } catch (error) {
+                responseMessage.classList.remove('d-none', 'alert-success');
+                responseMessage.classList.add('alert-danger');
+                responseMessage.innerText = 'An unexpected error occurred.';
+                console.error('Error:', error);
+            }
+        });
+    </script>
+{% endblock %}
+
+<div id="activityContainer"></div>
+
+<!-- <script>
+    const activities = {{ activities|safe }};
+    const icons = {
+        running: '<i class="fas fa-running"></i>',
+        cycling: '<i class="fas fa-biking"></i>',
+        swimming: '<i class="fas fa-swimmer"></i>',
+        yoga: '<i class="fas fa-spa"></i>',
+        default: '<i class="fas fa-question-circle"></i>'
+    };
+
+    const activityContainer = document.getElementById('activityContainer');
+    activities.forEach(activity => {
+        const icon = icons[activity.type] || icons.default;
+        const card = `
+            <div class="card" style="width: 95%; margin: 10px 0;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">${icon} ${activity.name}</h4>
+                    <span>${activity.duration}</span>
+                </div>
+                <div class="card-body">
+                    <i class="fas fa-fire"></i> ${activity.calories} Calories
+                    <i class="fas fa-star"></i> ${activity.points} Points
+                </div>
+            </div>`;
+        activityContainer.innerHTML += card;
+    });
+</script> -->
