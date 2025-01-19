@@ -6,6 +6,17 @@ from django.db.models.functions import Cast
 from django.db import transaction
 from .user_goal import *
 
+from django.forms.models import model_to_dict
+
+def serialize_user_challenge(user_challenge):
+    return {
+        'id': user_challenge.id,
+        'progress': user_challenge.progress,
+        'points_earned': user_challenge.points_earned,
+        'challenge': model_to_dict(user_challenge.challenge, exclude=['participants']),
+        'user': model_to_dict(user_challenge.user, fields=['id', 'username', 'email']),
+    }
+
 @transaction.atomic
 def edit_user_chalenge(user, challenge_id, progress):
     # load Challenge
@@ -18,13 +29,14 @@ def edit_user_chalenge(user, challenge_id, progress):
     # Update 
     old_calories = challenge.calories * user_challenge.progress
     try:
-        user_challenge.progress = round(progress/100, 2)
-        user_challenge.points_earned = int(round(progress/100, 2) * challenge.points)
+        user_challenge.progress = progress
+        user_challenge.points_earned = progress * challenge.points
         user_challenge.save()
+        print(user_challenge.progress)
     except Exception as e:
         return {"success": False, "message": "Could not be Updated"}   
     # Goal
-    new_calories = challenge.calories * round(progress/100, 2)
+    new_calories = challenge.calories * progress
     added_calories = new_calories - old_calories
     rslt = update_goal_progress(user, added_calories)
     if not rslt.get("success", False):

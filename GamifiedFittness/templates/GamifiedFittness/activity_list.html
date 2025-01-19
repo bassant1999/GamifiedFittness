@@ -65,7 +65,7 @@
     <div class="card m-4" style="width: 95%;">
         <h2 class="card-header">Filter</h2>
         <div class="card-body">
-            <form id="filter-activities-form" method="GET" action="{% url 'list_activity' %}">
+            <form id="filter-activities-form" method="GET" action="{% url 'list_activity_view' %}">
                 <div class="row">
                     <!-- Name Filter -->
                     <div class="col-md-3">
@@ -124,7 +124,7 @@
                                 <span class="me-5"><i class="fas fa-star" style="color: gold;"></i> {{ User_activity.points }} Pts</span>
                                 <p class="card-text mt-4">
                                     <small class="d-flex justify-content-end text-muted"> 
-                                        <i class="fas fa-calendar-alt"></i>
+                                        <i class="fa-calendar-alt fas me-1"></i>
                                         {{ User_activity.start_date }} 
                                     </small>
                                 </p>
@@ -159,7 +159,7 @@
 
         function reset(event) {
             event.preventDefault();
-            window.location.href = '{% url "list_activity" %}';
+            window.location.href = '{% url "list_activity_view" %}';
         }
 
 
@@ -188,7 +188,7 @@
                     responseMessage.classList.add('alert-danger');
                     responseMessage.innerText = data.error || 'An error occurred.';
                 } 
-                window.location.href = '{% url "list_activity" %}';
+                window.location.href = '{% url "list_activity_view" %}';
             } catch (error) {
                 responseMessage.classList.remove('d-none', 'alert-success');
                 responseMessage.classList.add('alert-danger');

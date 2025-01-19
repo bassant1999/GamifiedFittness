@@ -1,4 +1,6 @@
 function renderChart(canvasId, labels, points, calories, title) {
+    console.log("here");
+    
     if(labels.length == 0) {
         labels = ['No Data'];
     }

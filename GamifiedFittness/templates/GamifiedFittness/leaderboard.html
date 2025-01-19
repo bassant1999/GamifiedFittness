@@ -1,0 +1,84 @@
+{% extends "GamifiedFittness/layout.html" %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block header %} 
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="header">Leaderboard</h1>
+    </div>
+{% endblock %}
+
+{% block modal %}
+{% endblock %}
+
+{% block body %}
+    <div>
+        <div class="me-5 ms-5 table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Points</th>
+                    <th scope="col">Calories</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(user, index) in leaderboard"  :class="{ 'table-success': {{request.user.id}} == user.user_id }">
+                    <th scope="row">[[ index+1 ]]</th>
+                    <td  v-if="{{request.user.id}} == user.user_id">You</td>
+                    <td  v-else>[[ user.user_name ]]</td>
+                    <td>[[ user.total_points ]]</td>
+                    <td>[[ user.total_calories ]]</td>
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="module">
+
+        const { createApp, ref, onMounted } = Vue;
+
+        const App = {
+            delimiters: ['[[', ']]'], // Change delimiters to avoid conflict
+            setup() {
+                const leaderboard =  ref([]);
+
+                async function loadLeaderboard(){
+                    var strUrl = "{% url 'leaderboard' %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            leaderboard.value = [];
+                        }else{
+                            leaderboard.value = response.leaderboard;
+                        }
+                }
+
+                onMounted(() => {
+                    loadLeaderboard();
+                })
+
+                return {
+                    leaderboard
+                };
+            },
+        };
+
+        // Initialize the Vue app and mount it to the DOM
+        createApp(App).mount('#app');
+    </script>
+
+{% endblock %}

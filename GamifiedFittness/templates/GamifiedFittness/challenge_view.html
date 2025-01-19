@@ -1,0 +1,346 @@
+{% extends "GamifiedFittness/layout.html" %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block header %} 
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="header">[[challenge.name]]</h1>
+        <button v-if="Object.keys(user_challenge).length == 0" type="button" 
+            class="btn btn-outline-secondary m-lg-3" data-bs-toggle="modal" data-bs-target="#joinChallenge"
+            @click="beforeJoin">
+            Join
+        </button>
+        <button v-else type="button" class="btn btn-outline-danger m-lg-3" data-bs-toggle="modal" 
+            @click="beforeLeave" data-bs-target="#leaveChallenge">
+            Disconnect
+        </button>
+    </div>
+{% endblock %}
+
+{% block modal %}
+    <div class="modal fade" id="joinChallenge" tabindex="-1" aria-labelledby="joinChallengeModal" aria-hidden="true" ref="joinChallengeModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="joinChallengeModal">Join Chalenge</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="response-message-join" class="alert d-none"></div>
+                    <div class="p-3 mb-3">
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                <!-- WhatsApp -->
+                                <a :href="'https://wa.me/?text='+[[ shareURL ]]" target="_blank" class="btn btn-success d-flex align-items-center gap-2">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </a>
+                    
+                                <!-- Twitter -->
+                                <a :href="'https://twitter.com/intent/tweet?url=' + [[ shareURL ]] + '&text=Share-Challenge'" target="_blank" class="btn btn-primary d-flex align-items-center gap-2">
+                                    <i class="fab fa-twitter"></i> Twitter
+                                </a>
+                    
+                                <!-- Facebook -->
+                                <a :href="'https://www.facebook.com/sharer/sharer.php?u='+ [[ shareURL ]]" target="_blank" class="btn btn-primary d-flex align-items-center gap-2" style="background-color: #1877F2;">
+                                    <i class="fab fa-facebook"></i> Facebook
+                                </a>
+                    
+                                <!-- Reddit -->
+                                <a :href="'https://reddit.com/submit?url='+ [[shareURL ]] + '&title=Chalenge'" target="_blank" class="btn btn-danger d-flex align-items-center gap-2">
+                                    <i class="fab fa-reddit"></i> Reddit
+                                </a>
+
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" :value="shareURL" aria-describedby="basic-addon2">
+                                    <div class="input-group-append">
+                                      <button class="btn btn-outline-secondary" type="button"  @click="copyToClipboard(shareURL)"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-share"></i>
+                                    share with your friends and encourage each others
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" @click="joinChallenge()">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="leaveChallenge" tabindex="-1" aria-labelledby="leaveChallengeModal" aria-hidden="true" ref="leaveChallengeModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="leaveChallengeModal">Disconnect from Chalenge</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="response-message-leave" class="alert d-none"></div>
+                    <div class="p-3 mb-3">
+                        Are you Sure?
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" @click="leaveChallenge()">Yes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="updateChallengeProgress" tabindex="-1" aria-labelledby="updateChallengeProgressModal" aria-hidden="true" ref="updateChallengeProgressModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateChallengeProgressModal">Update Progress</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="response-message-update" class="alert d-none"></div>
+                    <div class="p-3 mb-3">
+                        Are you Sure?
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" @click="updateChallengeProgress()">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div id="progress" class="m-3">
+        <div  v-if="Object.keys(user_challenge).length != 0">
+            <h4 class="mt-2">Your Progress</h4>
+            <div class="row">
+                <div class="col-md-9">
+                    <input type="range" id="progress-slider" class="form-range" 
+                        min="0" max="100" step="1" 
+                        v-model="user_challenge_progress">
+                    <div class="text-sm-center mt-2">
+                        [[user_challenge_progress]]
+                    </div>
+                    <div class="text-sm-center text-primary"> [[  parseFloat((user_challenge.progress * challenge.calories).toFixed(2)) ]] out of [[ challenge.calories ]] Cal</div>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-outline-primary ms-auto ms-lg-3"
+                        data-bs-toggle="modal" data-bs-target="#updateChallengeProgress">
+                        Update
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="me-5 ms-5 table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th scope="row">Calories</th>
+                    <td>[[ challenge.calories ]]</td>
+                    <th scope="row">Points</th>
+                    <td>[[ challenge.points ]]</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Start Date</th>
+                    <td>[[ challenge.start_date ]]</td>
+                    <th scope="row">End Date</th>
+                    <td>[[ challenge.end_date ]]</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Description</th>
+                    <td colspan="3">[[challenge.description]]</td>
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script type="module">
+
+        const { createApp, ref, onMounted } = Vue;
+
+        const App = {
+            delimiters: ['[[', ']]'], // Change delimiters to avoid conflict
+            setup() {
+                const challenge=  ref({});
+                const user_challenge = ref({});
+                const shareURL = ref("");
+                const user_challenge_progress = ref(0);
+                const csrftoken = '{{ csrf_token }}';
+
+                async function LoadChallenge(){
+                    var strUrl = "{% url 'load_chalenge' challenge_id %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            challenge.value = [];
+                        }else{
+                            challenge.value = response.challenge;
+                        }
+                } 
+
+                async function LoadUserChallenge(){
+                    var strUrl = "{% url 'load_user_chalenge' challenge_id %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            user_challenge.value = {};
+                        }else{
+                            user_challenge.value = response.user_challenge;
+                            user_challenge_progress.value = user_challenge.value.progress * 100;
+                        }
+                } 
+
+
+                async function joinChallenge (){
+                    const challengeID = challenge.value.id; 
+                    var strUrl =  `/GamifiedFittness/chalenges/join/${challengeID}`;
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            showErrorMessage("response-message-join", response.message || "Failed to join challenge.");
+                        }else{
+                            showSuccessMessage("response-message-join", "Successfully joined the challenge!");
+                            user_challenge.value = response.user_challenge;
+                            user_challenge_progress.value = user_challenge.value.progress * 100;
+                        }
+                } 
+
+                async function leaveChallenge (){
+                    const challengeID = challenge.value.id; 
+                    var strUrl =  `/GamifiedFittness/chalenges/leave/${challengeID}`;
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            showErrorMessage("response-message-leave", response.message || "Failed to Disconnect from challenge.");
+                        }else{
+                            showSuccessMessage("response-message-leave", "Successfully Disconnected from the challenge!");
+                            user_challenge.value = {};
+                        }
+                } 
+
+                async function updateChallengeProgress (){
+                    var strUrl = "{% url 'update_user_chalenge' %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ challenge_id: challenge.value.id, progress: user_challenge_progress.value/100 })
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            showErrorMessage("response-message-update", response.message || "Failed to update challenge.");
+                        }else{
+                            showSuccessMessage("response-message-update", "Successfully Updated the progress!");
+                            user_challenge.value.progress =  parseFloat((user_challenge_progress.value / 100).toFixed(2));
+                        }
+                } 
+
+
+                function beforeJoin (chalenge) {
+                    const challengeID = challenge.value.id; 
+                    shareURL.value =  buildAbsoluteUrl(`/GamifiedFittness/chalenges/${challengeID}`);
+                    resetMessage("response-message-join");
+                }
+
+                function beforeLeave (chalenge) {
+                    resetMessage("response-message-leave");
+                }
+
+                function copyToClipboard(text) {
+                    navigator.clipboard.writeText(text).then().catch((err) => {
+                        console.error("Failed to copy link:", err);
+                    });
+                }
+
+                function buildAbsoluteUrl(path) {
+                    const baseUrl = `${window.location.protocol}//${window.location.host}`;
+                    return `${baseUrl}${path}`;
+                }
+
+                function showSuccessMessage(responseMessageID, message) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.classList.remove("d-none", "alert-danger");
+                    responseMessage.classList.add("alert-success");
+                    responseMessage.textContent = message;
+                }
+
+                function showErrorMessage(responseMessageID, message) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.classList.remove("d-none", "alert-success");
+                    responseMessage.classList.add("alert-danger");
+                    responseMessage.textContent = message;
+                }
+
+                function resetMessage(responseMessageID) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.textContent = "";
+                    responseMessage.classList.remove("alert-success", "alert-danger");
+                    responseMessage.classList.add("d-none");
+                }
+
+                onMounted(() => {
+                    LoadChallenge();
+                    LoadUserChallenge();
+                })
+
+                return {
+                    challenge, user_challenge, shareURL,user_challenge_progress,
+                    beforeJoin, joinChallenge, copyToClipboard, beforeLeave, leaveChallenge, updateChallengeProgress
+                };
+            },
+        };
+
+        // Initialize the Vue app and mount it to the DOM
+        createApp(App).mount('#app');
+    </script>
+
+{% endblock %}

@@ -16,6 +16,7 @@ def add_challenge(user, name, points, calories, start_date, end_date, descriptio
             start_date=start_date,
             end_date=end_date,
         )
+
          
         # Add User to the Challenge
         user_challenge = UserChallenge.objects.create(
@@ -25,6 +26,7 @@ def add_challenge(user, name, points, calories, start_date, end_date, descriptio
             points_earned = 0
         )
     
+
     except Exception as e:
         return {"success": False, "message": "Could not add"}
     

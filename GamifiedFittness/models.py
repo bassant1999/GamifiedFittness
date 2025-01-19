@@ -44,24 +44,14 @@ class UserActivity(models.Model):
 # Challenge Model
 class Challenge(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     points = models.FloatField()
     calories = models.FloatField()
     start_date = models.DateField()
     end_date = models.DateField()
-    slug = models.SlugField(unique=True, blank=True)
-    participants = models.ManyToManyField(User, through="UserChallenge")
 
     def __str__(self):
         return self.name
-    
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
-    def get_share_link(self):
-        return f"{self.get_absolute_url()}"
 
 # User Challenge Model
 class UserChallenge(models.Model):

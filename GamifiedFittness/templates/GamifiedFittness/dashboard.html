@@ -13,6 +13,69 @@
 
 {% block header %} <h1 class="header"> Dashboard </h1> {% endblock %}
 
+{% block modal %}
+
+    <div class="modal fade" id="addGoal" tabindex="-1" aria-labelledby="addGoalModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGoalModal">Add Goal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="response-message-add" class="alert d-none"></div>
+
+                    <form id="goal-add-form" class="mb-4 mt-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" id="calories" name="calories" v-model="goal_add.calories" placeholder="Target Calories" required>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" @click="addGoal()">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="updateGoal" tabindex="-1" aria-labelledby="updateGoalModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateGoalModal">Update Goal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="response-message-update" class="alert d-none"></div>
+
+                    <form id="goal-update-form" class="mb-4 mt-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="number" class="form-control" id="calories" name="calories" v-model="goal_add.calories" placeholder="Target Calories" required>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" @click="updateGoal()">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
 {% block body %}
     <div id="summary" style="margin: 10px;">
         <div class="row">
@@ -20,7 +83,7 @@
                 <div class="card text-white bg-secondary mb-3" style="max-width: 18rem;">
                     <div class="card-header">Total Points</div>
                     <div class="card-body">
-                      <h5 class="card-title">{{summary.total_points}}</h5>
+                      <h5 class="card-title">[[ activity_summary.total_points + challenge_summary.total_points ]]</h5>
                     </div>
                 </div>
             </div>
@@ -28,7 +91,7 @@
                 <div class="card text-white bg-danger mb-3" style="max-width: 18rem;">
                     <div class="card-header">Total Calories</div>
                     <div class="card-body">
-                      <h5 class="card-title">{{summary.total_calories}}</h5>
+                      <h5 class="card-title">[[ activity_summary.total_calories + challenge_summary.total_calories ]] </h5>
                     </div>
                 </div>
             </div>
@@ -44,7 +107,7 @@
                 <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
                     <div class="card-header">Activities</div>
                     <div class="card-body">
-                      <h5 class="card-title">{{summary.activity_summary.count}}</h5>
+                      <h5 class="card-title">[[activity_summary.count]]</h5>
                     </div>
                 </div>
             </div>
@@ -52,21 +115,41 @@
     </div>
 
     <div class="badges">
-        {% for user_badge in user_badges %}
-            <div class="badge" title="{{user_badge.badge.description}}">
-                🏅 {{ user_badge.badge.name }}
-            </div>
-        {% endfor %}
+        <div class="badge" title="[[user_badge.badge.description]]" v-for="user_badge in user_badges">
+            🏅 [[ user_badge.badge.name ]]
+        </div>
     </div>
  
-    {% if goal %}
-        <div id="goal">
-            <div class="progress" style="height: 30px; margin: 15px;">
-                <div class="progress-bar" role="progressbar" style="width: {{ goal.progress_precentage }}%;" aria-valuenow="{{ goal.progress_precentage }}" aria-valuemin="0" aria-valuemax="100">{{ goal.progress_precentage }}%</div>
+    <div id="goal" class="m-3">
+        <div  v-if="Object.keys(goal).length != 0">
+            <div class="row">
+                <div class="col-md-9">
+                    <div class="progress" style="height: 30px;">
+                        <div v-if="goal.progress == 0" class="p-2 text-danger"> <strong>No Progress Yet</strong></div>
+                        <div v-else class="progress-bar" role="progressbar" :style="{ 'width':  goal.progress * 100 + '%' }" :aria-valuenow="goal.progress * 100" aria-valuemin="0" aria-valuemax="100">[[ goal.progress * 100 ]]%</div>
+                    </div>
+                    <div class="text-sm-center text-primary"> [[ goal.progress * goal.calories ]] out of [[ goal.calories ]] Cal</div>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-outline-primary ms-auto ms-lg-3"
+                        @click="beforeUpdateGoal"
+                        data-bs-toggle="modal" data-bs-target="#updateGoal">
+                        Update
+                    </button>
+                </div>
             </div>
         </div>
-    {% endif %}
-
+    
+        <div class="mb-4" v-else>
+            <button type="button" class="btn btn-primary ms-auto ms-lg-3"
+                data-bs-toggle="modal" data-bs-target="#addGoal">
+                Add Goal
+            </button>
+            <small class="text-muted">
+                Motivate yourself
+            </small>
+        </div>
+    </div>
 
     <div id="charts">
         <div class="row">
@@ -76,10 +159,10 @@
                         <h6 class="card-subtitle mb-2 text-muted">Points Per Day For Activities</h6>
                         <canvas id="dailyUserActivityPointsChart"></canvas>
                         <div style="width:60%; margin: 0 auto;">
-                            <h6> Activities Number: <span class="text-body-secondary">{{summary.activity_summary.count}}</span></h6>
-                            <h6> Total Points:  <span class="text-body-secondary">{{summary.activity_summary.total_points}}</span> </h6>
+                            <h6> Activities Number: <span class="text-body-secondary">[[activity_summary.count]]</span></h6>
+                            <h6> Total Points:  <span class="text-body-secondary">[[activity_summary.total_points]]</span> </h6>
                         </div>
-                        <a href="{% url 'list_activity' %}" class="card-link">Go to My Activities</a>
+                        <a href="{% url 'list_activity_view' %}" class="card-link">Go to My Activities</a>
                     </div>
                 </div>
             </div>
@@ -89,8 +172,8 @@
                         <h6 class="card-subtitle mb-2 text-muted">Points Per Day For Challenges</h6>
                         <canvas id="dailyUserChallengePointsChart"></canvas>
                         <div style="width:60%; margin: 0 auto;">
-                            <h6> Total chalenges Number: <span class="text-body-secondary">{{summary.challenge_summary.count}}</span> </h6>
-                            <h6> Total Points: <span class="text-body-secondary">{{summary.challenge_summary.total_points}}</span> </h6>
+                            <h6> Total chalenges Number: <span class="text-body-secondary">[[challenge_summary.count]]</span> </h6>
+                            <h6> Total Points: <span class="text-body-secondary">[[challenge_summary.total_points]]</span> </h6>
                         </div>
                         <a href="#" class="card-link">Go to My Challenges</a>
                     </div>
@@ -99,32 +182,271 @@
         </div>
     </div>
 
+
 {% endblock %}
+
 
 {% block script %}
-    <script>    
-        const activity_summary = {{ summary.activity_summary|safe }};
-        const challenge_summary = {{ summary.challenge_summary|safe }};
+    <script type="module">
 
-        // Activity Summary Chartelse {
-        renderChart(
-            'dailyUserActivityPointsChart',
-            activity_summary.points_per_day.map(item => item.date),
-            activity_summary.points_per_day.map(item => item.points),
-            activity_summary.points_per_day.map(item => item.calories),
-            'Total Points Per Day (Activity)'
-        );
+        const { createApp, ref, onMounted } = Vue;
 
-        
-        
-        // Challenge Summary Chart
-        renderChart(
-            'dailyUserChallengePointsChart',
-            challenge_summary.points_per_day.map(item => item.date),
-            challenge_summary.points_per_day.map(item => item.points),
-            challenge_summary.points_per_day.map(item => item.calories),
-            'Total Points Per Day (Challenge)' 
-        );
+        const App = {
+            delimiters: ['[[', ']]'], // Change delimiters to avoid conflict
+            setup() {
+                const activity_summary = ref([]);
+                const challenge_summary = ref([]);
+                const user_badges = ref([]);
+                const goal = ref({});
+                const goal_add = ref({});
+                const csrftoken = '{{ csrf_token }}';
 
+
+                async function summary (){
+                    var strUrl = "{% url 'summary' %}";
+
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            activity_summary.value = [];
+                            challenge_summary.value = [];
+                        }else{
+                            activity_summary.value = response.activity_summary;
+                            challenge_summary.value = response.challenge_summary;
+                        }
+                } 
+
+                async function listUserBadges (){
+                    var strUrl = "{% url 'list_user_badges' %}";
+
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                    let response = await fetchResult.json();
+                    if(!response.success){
+                        user_badges.value = [];
+                    }else{
+                        user_badges.value = response.user_badges;
+                    }
+                } 
+
+                async function getGoal (){
+                    var strUrl = "{% url 'get_goal' %}";
+
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                    let response = await fetchResult.json();
+                    if(!response.success){
+                        goal.value = [];
+                    }else{
+                        goal.value = response.goal;
+                    }
+                } 
+
+                async function addGoal (){
+                    var strUrl = "{% url 'add_goal' %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ goal: goal_add.value })
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            showErrorMessage("response-message-add", response.message || "Failed to Add Goal.");
+                        }else{
+                            showSuccessMessage("response-message-add", "Successfully Added the Goal!");
+                            goal.value = response.goal
+                            goal_add.value = {};
+
+                        }
+                } 
+
+                async function updateGoal (){
+                    var strUrl = "{% url 'update_goal' %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ goal: goal_add.value })
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            showErrorMessage("response-message-update", response.message || "Failed to Update Goal.");
+                        }else{
+                            showSuccessMessage("response-message-update", "Successfully Updated the Goal!");
+                            goal.value = response.goal
+                            // goal_add.value = {};
+
+                        }
+                } 
+
+                function beforeUpdateGoal(){
+                    goal_add.value = JSON.parse(JSON.stringify(goal.value));
+                    resetMessage("response-message-update");
+                }
+
+
+                function renderChart(canvasId, labels, points, calories, title) {
+                    
+                    if(labels.length == 0) {
+                        labels = ['No Data'];
+                    }
+                    if(points.length == 0) {
+                        points = [0];
+                    }
+                    if(calories.length == 0) {
+                        calories = [0];
+                    }    
+
+                    const ctx = document.getElementById(canvasId).getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: title,
+                                data: points,
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1,
+                                fill: true,
+                                yAxisID: 'y'
+                            },
+                        {
+                            label: 'Calories',
+                            data: calories,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y1'
+                        }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Date'
+                                    }
+                                },
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    title: {
+                                        display: true,
+                                        text: 'Points'
+                                    },
+                                    ticks: {
+                                        beginAtZero: true
+                                    }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    title: {
+                                        display: true,
+                                        text: 'Calories'
+                                    },
+                                    ticks: {
+                                        beginAtZero: true
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                
+                function showSuccessMessage(responseMessageID, message) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.classList.remove("d-none", "alert-danger");
+                    responseMessage.classList.add("alert-success");
+                    responseMessage.textContent = message;
+                }
+
+                function showErrorMessage(responseMessageID, message) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.classList.remove("d-none", "alert-success");
+                    responseMessage.classList.add("alert-danger");
+                    responseMessage.textContent = message;
+                }
+
+                function resetMessage(responseMessageID) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.textContent = "";
+                    responseMessage.classList.remove("alert-success", "alert-danger");
+                    responseMessage.classList.add("d-none");
+                }
+
+                
+                onMounted(async() => {
+                    await summary();
+                    // Activity Summary Chart
+                    renderChart(
+                        'dailyUserActivityPointsChart',
+                        activity_summary.value.points_per_day.map(item => item.date),
+                        activity_summary.value.points_per_day.map(item => item.points),
+                        activity_summary.value.points_per_day.map(item => item.calories),
+                        'Total Points Per Day (Activity)'
+                    );
+                    // Challenge Summary Chart
+                    renderChart(
+                        'dailyUserChallengePointsChart',
+                        challenge_summary.value.points_per_day.map(item => item.date),
+                        challenge_summary.value.points_per_day.map(item => item.points),
+                        challenge_summary.value.points_per_day.map(item => item.calories),
+                        'Total Points Per Day (Challenge)' 
+                    );
+                    listUserBadges();
+                    getGoal();
+                
+                })
+
+                return {
+                    activity_summary, challenge_summary, user_badges, goal, goal_add,
+                    addGoal, beforeUpdateGoal, updateGoal
+                };
+            },
+        };
+
+        // Initialize the Vue app and mount it to the DOM
+        createApp(App).mount('#app');
     </script>
 {% endblock %}
+
+
+

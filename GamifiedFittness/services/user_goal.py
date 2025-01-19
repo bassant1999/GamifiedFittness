@@ -23,7 +23,7 @@ def add_goal(user, calories):
     
     return {"success": True, "message": "Added Successfully"}
 
-def add_goal_calories(user, calories):
+def update_goal_calories(user, calories):
     if calories == 0:
         return {"success": False, "message": "Calories cannot be zero."}
     # get goal
@@ -35,12 +35,12 @@ def add_goal_calories(user, calories):
         old_achieved_calories = goal.progress * goal.calories
         goal.calories = calories
         updated_progress = old_achieved_calories/calories
-        goal.progress = round(min(updated_progress, 1.0),2)
+        goal.progress = round(min(updated_progress, 1.0), 5)
         goal.save()
     except Exception as e:
         return {"success": False, "message": f"Error Updating Goal: {str(e)}"}
     
-    return {"success": True, "message": "Added Successfully"}
+    return {"success": True, "message": "Update Successfully", "data": goal}
 
 def update_goal_progress(user, added_calories):
     # get appropiate goal

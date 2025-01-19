@@ -1,6 +1,7 @@
 {% extends "GamifiedFittness/layout.html" %}
 
 {% block head %}
+
 {% endblock %}
 
 {% block header %} 
@@ -21,26 +22,26 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="response-message" class="alert d-none"></div>
+                    <div id="response-message-add" class="alert d-none"></div>
 
                     <form id="chalenge-add-form">
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="name">Name</label>
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="Name" required>
+                                    <input type="text" class="form-control" id="name" name="name" v-model="Challenge.name" placeholder="Name" required>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="calories">Calories</label>
-                                    <input type="number" class="form-control" id="calories" name="calories" placeholder="Calories" required>
+                                    <input type="number" class="form-control" id="calories" name="calories" v-model="Challenge.calories" placeholder="Calories" required>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="points">Points</label>
-                                    <input type="number" class="form-control" id="points" name="points" placeholder="Points" required>
+                                    <input type="number" class="form-control" id="points" name="points" v-model="Challenge.points" placeholder="Points" required>
                                 </div>
                             </div>
                         </div>
@@ -49,7 +50,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="description">Description</label>
-                                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="Description"></textarea>
+                                    <textarea class="form-control" id="description" name="description" rows="3" v-model="Challenge.description" placeholder="Description"></textarea>
                                   </div>
                             </div>
                         </div>
@@ -58,89 +59,101 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="start_date">Start Date</label>
-                                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                                    <input type="date" class="form-control" id="start_date" name="start_date" v-model="Challenge.start_date" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="end_date">End Date</label>
-                                    <input type="date" class="form-control" id="end_date" name="end_date" required>
+                                    <input type="date" class="form-control" id="end_date" name="end_date" v-model="Challenge.end_date" required>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">Save</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
+                        
                     </form>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" @click="addChallenge()">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="joinChallenge" tabindex="-1" aria-labelledby="addChallengeModal" aria-hidden="true">
+    <div class="modal fade" id="joinChallenge" tabindex="-1" aria-labelledby="joinChallengeModal" aria-hidden="true" ref="joinChallengeModal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addChallengeModal">Join Chalenge</h5>
+                    <h5 class="modal-title" id="joinChallengeModal">Join Chalenge</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="response-message" class="alert d-none"></div>
-                    <i class="fa-solid fa-copy"></i>
-                    <i class="fa-solid fa-share-from-square"></i>
-                    <form id="chalenge-add-form">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="name">Name</label>
-                                    <input type="text" class="form-control" id="name" name="name" placeholder="Name" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="calories">Calories</label>
-                                    <input type="number" class="form-control" id="calories" name="calories" placeholder="Calories" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="points">Points</label>
-                                    <input type="number" class="form-control" id="points" name="points" placeholder="Points" required>
-                                </div>
-                            </div>
-                        </div>
-                       
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="description">Description</label>
-                                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="Description"></textarea>
-                                  </div>
-                            </div>
-                        </div>
-                
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="start_date">Start Date</label>
-                                    <input type="date" class="form-control" id="start_date" name="start_date" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="end_date">End Date</label>
-                                    <input type="date" class="form-control" id="end_date" name="end_date" required>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="response-message-join" class="alert d-none"></div>
+                    <div class="p-3 mb-3">
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                <!-- WhatsApp -->
+                                <a :href="'https://wa.me/?text='+[[ shareURL ]]" target="_blank" class="btn btn-success d-flex align-items-center gap-2">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </a>
+                    
+                                <!-- Twitter -->
+                                <a :href="'https://twitter.com/intent/tweet?url=' + [[ shareURL ]] + '&text=Share-Challenge'" target="_blank" class="btn btn-primary d-flex align-items-center gap-2">
+                                    <i class="fab fa-twitter"></i> Twitter
+                                </a>
+                    
+                                <!-- Facebook -->
+                                <a :href="'https://www.facebook.com/sharer/sharer.php?u='+ [[ shareURL ]]" target="_blank" class="btn btn-primary d-flex align-items-center gap-2" style="background-color: #1877F2;">
+                                    <i class="fab fa-facebook"></i> Facebook
+                                </a>
+                    
+                                <!-- Reddit -->
+                                <a :href="'https://reddit.com/submit?url='+ [[shareURL ]] + '&title=Chalenge'" target="_blank" class="btn btn-danger d-flex align-items-center gap-2">
+                                    <i class="fab fa-reddit"></i> Reddit
+                                </a>
 
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">Save</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" :value="shareURL" aria-describedby="basic-addon2">
+                                    <div class="input-group-append">
+                                      <button class="btn btn-outline-secondary" type="button"  @click="copyToClipboard(shareURL)"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-share"></i>
+                                    share with your friends and encourage each others
+                                </small>
+                            </div>
                         </div>
-                    </form>
+                    </div>
+
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" @click="joinChallenge()">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="leaveChallenge" tabindex="-1" aria-labelledby="leaveChallengeModal" aria-hidden="true" ref="leaveChallengeModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="leaveChallengeModal">Disconnect from Chalenge</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="response-message-leave" class="alert d-none"></div>
+                    <div class="p-3 mb-3">
+                        Are you Sure?
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" @click="leaveChallenge()">Yes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -148,110 +161,295 @@
 {% endblock %}
 
 {% block body %}
-    <div class="border-light card m-4">
-        <div class="d-flex justify-content-between mt-4">
+<div class="m-5">
+    <!-- Nav Tabs -->
+    <ul class="nav nav-tabs" id="challenges_tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="all-challenges" data-bs-toggle="tab" data-bs-target="#all_challenges" type="button" role="tab" aria-controls="all_challenges" aria-selected="true">
+                All
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="my-challenges" data-bs-toggle="tab" data-bs-target="#my_challenges" type="button" role="tab" aria-controls="my_challenges" aria-selected="false">
+                My Challenges
+            </button>
+        </li>
+    </ul>
 
-            {% if chalenges.has_previous %}
-                <a href="?page={{ chalenges.previous_page_number }}" class="btn btn-primary">
-                    &larr; Previous
-                </a>
-            {% else %}
-                <a class="btn btn-secondary disabled" aria-disabled="true">
-                    &larr; Previous
-                </a>
-            {% endif %}
-            {% if chalenges.has_next %}
-                <a href="?page={{ chalenges.next_page_number }}" class="btn btn-primary">
-                    Next &rarr;
-                </a>
-            {% else %}
-                <a class="btn btn-secondary disabled" aria-disabled="true">
-                    Next &rarr;
-                </a>
-            {% endif %}
-        </div>
-        
-        {% if chalenges|length > 0 %}
-            <div class="card-body">
-                <div class="d-flex flex-wrap">
-                    {% for chalenge in chalenges %}
-                        <div class="card me-5 mb-5" style="width:fit-content">
+    <!-- Tabs Content -->
+    <div class="tab-content mt-3" id="challenges_tabs_content">
+        <div class="tab-pane fade show active" id="all_challenges" role="tabpanel" aria-labelledby="all-challenges">
+            <div class="border-light card m-4">
+                <div class="card-body" v-if="challenges.length > 0">
+                    <div class="d-flex flex-wrap">
+                        <div class="card me-5 mb-5" style="width:fit-content" v-for="(chalenge, index) in challenges">
                             <div class="card-header d-flex align-items-center justify-content-between">
                                 <h4> 
                                     <i class="fas fa-trophy text-primary"></i>
-                                    {{ chalenge.name }} 
+                                    [[ chalenge.name ]] 
                                 </h4> 
-                                <button type="button" class="btn btn-primary ms-auto ms-lg-3" data-bs-toggle="modal" data-bs-target="#joinChallenge">
+                                <button type="button" class="btn btn-link ms-auto ms-lg-3"
+                                    @click="beforeJoin(chalenge)"
+                                    data-bs-toggle="modal" data-bs-target="#joinChallenge"
+                                    v-if="!user_challenges.some(item => item.challenge.id === chalenge.id)">
                                     Join
                                 </button>
+                                <button type="button" class="btn btn-link ms-auto ms-lg-3"
+                                    @click="beforeLeave(chalenge)"
+                                    data-bs-toggle="modal" data-bs-target="#leaveChallenge"
+                                    v-else>
+                                    Disconnect
+                                </button>
+                                <a class="ms-3" :href="`/GamifiedFittness/chalenges/${chalenge.id}`" title="View"><i class="fa fa-eye"></i></a>
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <span class="me-3"><i class="fas fa-fire" style="color: gold;"></i> {{ chalenge.calories }} Cal</span>
-                                    <span class="me-3"><i class="fas fa-star" style="color: gold;"></i> {{ chalenge.points }} Pts</span>
+                                    <span class="me-3"><i class="fas fa-fire" style="color: gold;"></i> [[ chalenge.calories ]] Cal</span>
+                                    <span class="me-3"><i class="fas fa-star" style="color: gold;"></i> [[ chalenge.points ]] Pts</span>
                                 </div>
-                                {% if chalenge.description %}
-                                    <p class="card-text">
-                                        <i class="fas fa-info-circle"></i> {{ chalenge.description }}
-                                    </p>
-                                {% endif %}
+                                <p class="card-text" v-if="chalenge.description">
+                                    <i class="fas fa-info-circle"></i> [[ chalenge.description ]]
+                                </p>
                                 <p class="card-text d-flex justify-content-end mt-4"> 
-                                    <small class="text-muted"> <i class="fas fa-calendar-alt"></i> {{ chalenge.start_date }} </small>
+                                    <small class="text-muted"> <i class="fas fa-calendar-alt"></i> [[ chalenge.start_date ]] </small>
                                     &nbsp; to &nbsp; 
-                                    <small class=" text-muted"> <i class="fas fa-calendar-alt"></i> {{ chalenge.end_date }} </small></p>
+                                    <small class=" text-muted"> <i class="fas fa-calendar-alt"></i> [[ chalenge.end_date ]] </small></p>
                             </div>
                         </div>
-                    {% endfor %}
+                    </div>
+                </div>
+                <div class="alert alert-warning m" role="alert" v-if="challenges.length == 0">
+                    <i class="fa-solid fa-triangle-exclamation"></i> No Chalenges Yet
                 </div>
             </div>
-        {% else %}
-            <div class="alert alert-warning m" role="alert">
-                <i class="fa-solid fa-triangle-exclamation"></i> No Chalenges Yet
+        </div>
+        <div class="tab-pane fade" id="my_challenges" role="tabpanel" aria-labelledby="my-challenges">
+            <div class="border-light card m-4">
+                <div class="card-body" v-if="my_challenges.length > 0">
+                    <div class="d-flex flex-wrap">
+                        <div class="card me-5 mb-5" style="width:fit-content" v-for="(user_challenge, index) in my_challenges">
+                            <div class="card-header d-flex align-items-center justify-content-between">
+                                <h4> 
+                                    <i class="fas fa-trophy text-primary"></i>
+                                    [[ user_challenge.challenge.name ]] 
+                                </h4> 
+                                <button type="button" class="btn btn-link ms-auto ms-lg-3"
+                                    @click="beforeLeave(user_challenge.challenge)"
+                                    data-bs-toggle="modal" data-bs-target="#leaveChallenge"
+                                    v-else>
+                                    Disconnect
+                                </button>
+                                <a class="ms-3" :href="`/GamifiedFittness/chalenges/${user_challenge.challenge.id}`" title="View"><i class="fa fa-eye"></i></a>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <span class="me-3"><i class="fas fa-fire" style="color: gold;"></i> [[ user_challenge.challenge.calories ]] Cal</span>
+                                    <span class="me-3"><i class="fas fa-star" style="color: gold;"></i> [[ user_challenge.challenge.points ]] Pts</span>
+                                </div>
+                                <p class="card-text" v-if="user_challenge.challenge.description">
+                                    <i class="fas fa-info-circle"></i> [[ user_challenge.challenge.description ]]
+                                </p>
+                                <p class="card-text d-flex justify-content-end mt-4"> 
+                                    <small class="text-muted"> <i class="fas fa-calendar-alt"></i> [[ user_challenge.challenge.start_date ]] </small>
+                                    &nbsp; to &nbsp; 
+                                    <small class=" text-muted"> <i class="fas fa-calendar-alt"></i> [[ user_challenge.challenge.end_date ]] </small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-warning m" role="alert" v-if="my_challenges.length == 0">
+                    <i class="fa-solid fa-triangle-exclamation"></i> No Chalenges Yet
+                </div>
             </div>
-        {% endif %}
+        </div>
     </div>
+</div>
+
+   
    
 {% endblock %}
 
 {% block script %}
-    <script>
+    <script type="module">
 
-        document.getElementById('chalenge-add-form').addEventListener('submit', async function (event) {
-            
-            event.preventDefault(); 
+        const { createApp, ref, onMounted } = Vue;
 
-            const form = event.target;
-            const formData = new FormData(form);
-            const responseMessage = document.getElementById('response-message');
+        const App = {
+            delimiters: ['[[', ']]'], // Change delimiters to avoid conflict
+            setup() {
+                const challenges = ref([]);
+                const user_challenges = ref([]);
+                const my_challenges = ref([]);
+                const Challenge =  ref({});
+                const shareURL = ref("");
+                const csrftoken = '{{ csrf_token }}';
+                const index = ref(-1);
 
-            try {
-                const response = await fetch("{% url 'add_chalenge' %}", {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    responseMessage.classList.remove('d-none', 'alert-success');
-                    responseMessage.classList.add('alert-danger');
-                    responseMessage.innerText = data.error || 'An error occurred.';
+                async function List (){
+                    var strUrl = "{% url 'list_chalenges' %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            challenges.value = [];
+                        }else{
+                            challenges.value = response.chalenges;
+                        }
                 } 
-                window.location.href = '{% url "list_chalenge" %}';
-            } catch (error) {
-                responseMessage.classList.remove('d-none', 'alert-success');
-                responseMessage.classList.add('alert-danger');
-                responseMessage.innerText = 'An unexpected error occurred.';
-                console.error('Error:', error);
-            }
-        });
 
+                async function getUserChallenges (){
+                    var strUrl = "{% url 'list_user_chalenges' %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            user_challenges.value = [];
+                            my_challenges.value = []
+                        }else{
+                            user_challenges.value = response.user_chalenges;
+                            my_challenges.value = user_challenges.value.filter(item => item.user.id == {{ request.user.id }});
+                            
+                        }
+                } 
 
+                async function addChallenge (){
+                    var strUrl = "{% url 'add_chalenge' %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ Challenge: Challenge.value })
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            showErrorMessage("response-message-add", response.message || "Failed to Add challenge.");
+                        }else{
+                            showSuccessMessage("response-message-add", "Successfully Added the challenge!");
+                            List();
+                            getUserChallenges();
+                            Challenge.value = {};
+
+                        }
+                } 
+
+                async function joinChallenge (){
+                    const challengeID = Challenge.value.id; 
+                    var strUrl =  `/GamifiedFittness/chalenges/join/${challengeID}`;
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            showErrorMessage("response-message-join", response.message || "Failed to join challenge.");
+                        }else{
+                            showSuccessMessage("response-message-join", "Successfully joined the challenge!");
+                            user_challenges.value.push(response.user_challenge);
+                            my_challenges.value.push(response.user_challenge);
+                            
+                            Challenge.value = {};
+                        }
+                } 
+
+                async function leaveChallenge (){
+                    const challengeID = Challenge.value.id; 
+                    var strUrl =  `/GamifiedFittness/chalenges/leave/${challengeID}`;
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            showErrorMessage("response-message-leave", response.message || "Failed to Disconnect from challenge.");
+                        }else{
+                            showSuccessMessage("response-message-leave", "Successfully Disconnected from the challenge!");
+                            user_challenges.value = user_challenges.value.filter(item => item.challenge.id !== Challenge.value.id);
+                            my_challenges.value = my_challenges.value.filter(item => item.challenge.id !== Challenge.value.id);
+                            Challenge.value = {};
+                        }
+                } 
+
+                function beforeJoin (chalenge) {
+                    Challenge.value = chalenge;
+                    const challengeID = Challenge.value.id; 
+                    shareURL.value =  buildAbsoluteUrl(`/GamifiedFittness/chalenges/${challengeID}`);
+                    resetMessage("response-message-join");
+                }
+
+                function beforeLeave (chalenge) {
+                    Challenge.value = chalenge;
+                    resetMessage("response-message-leave");
+                }
+
+                function copyToClipboard(text) {
+                    navigator.clipboard.writeText(text).then().catch((err) => {
+                        console.error("Failed to copy link:", err);
+                    });
+                }
+
+                function buildAbsoluteUrl(path) {
+                    const baseUrl = `${window.location.protocol}//${window.location.host}`;
+                    return `${baseUrl}${path}`;
+                }
+
+                function showSuccessMessage(responseMessageID, message) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.classList.remove("d-none", "alert-danger");
+                    responseMessage.classList.add("alert-success");
+                    responseMessage.textContent = message;
+                }
+
+                function showErrorMessage(responseMessageID, message) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.classList.remove("d-none", "alert-success");
+                    responseMessage.classList.add("alert-danger");
+                    responseMessage.textContent = message;
+                }
+
+                function resetMessage(responseMessageID) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.textContent = "";
+                    responseMessage.classList.remove("alert-success", "alert-danger");
+                    responseMessage.classList.add("d-none");
+                }
+
+                onMounted(() => {
+                    List();
+                    getUserChallenges();
+                })
+
+                return {
+                    challenges, Challenge, user_challenges, my_challenges, shareURL,index,
+                    addChallenge, beforeJoin, joinChallenge, copyToClipboard, beforeLeave, leaveChallenge
+                };
+            },
+        };
+
+        // Initialize the Vue app and mount it to the DOM
+        createApp(App).mount('#app');
     </script>
-{% endblock %}
 
-<div id="chalengeContainer"></div>
+{% endblock %}
