@@ -50,7 +50,7 @@ def update_goal_progress(user, added_calories):
     # Update the progress
     try:
         updated_progress = goal.progress + (added_calories/ goal.calories)
-        goal.progress = round(min(updated_progress, 1.0),2)
+        goal.progress = round(min(updated_progress, 1.0),4)
         goal.save()
     except Exception as e:
         return {"success": False, "message": f"Error Updating Goal: {str(e)}"}

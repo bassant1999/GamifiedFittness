@@ -94,22 +94,18 @@
                     <div class="p-3 mb-3">
                         <div class="card-body">
                             <div class="d-flex flex-wrap gap-2">
-                                <!-- WhatsApp -->
                                 <a :href="'https://wa.me/?text='+[[ shareURL ]]" target="_blank" class="btn btn-success d-flex align-items-center gap-2">
                                     <i class="fab fa-whatsapp"></i> WhatsApp
                                 </a>
                     
-                                <!-- Twitter -->
                                 <a :href="'https://twitter.com/intent/tweet?url=' + [[ shareURL ]] + '&text=Share-Challenge'" target="_blank" class="btn btn-primary d-flex align-items-center gap-2">
                                     <i class="fab fa-twitter"></i> Twitter
                                 </a>
                     
-                                <!-- Facebook -->
                                 <a :href="'https://www.facebook.com/sharer/sharer.php?u='+ [[ shareURL ]]" target="_blank" class="btn btn-primary d-flex align-items-center gap-2" style="background-color: #1877F2;">
                                     <i class="fab fa-facebook"></i> Facebook
                                 </a>
                     
-                                <!-- Reddit -->
                                 <a :href="'https://reddit.com/submit?url='+ [[shareURL ]] + '&title=Chalenge'" target="_blank" class="btn btn-danger d-flex align-items-center gap-2">
                                     <i class="fab fa-reddit"></i> Reddit
                                 </a>
@@ -127,8 +123,6 @@
                             </div>
                         </div>
                     </div>
-
-                    
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary" @click="joinChallenge()">Save</button>
@@ -162,7 +156,6 @@
 
 {% block body %}
 <div class="m-5">
-    <!-- Nav Tabs -->
     <ul class="nav nav-tabs" id="challenges_tabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="all-challenges" data-bs-toggle="tab" data-bs-target="#all_challenges" type="button" role="tab" aria-controls="all_challenges" aria-selected="true">
@@ -176,7 +169,6 @@
         </li>
     </ul>
 
-    <!-- Tabs Content -->
     <div class="tab-content mt-3" id="challenges_tabs_content">
         <div class="tab-pane fade show active" id="all_challenges" role="tabpanel" aria-labelledby="all-challenges">
             <div class="border-light card m-4">
@@ -283,7 +275,6 @@
                 const Challenge =  ref({});
                 const shareURL = ref("");
                 const csrftoken = '{{ csrf_token }}';
-                const index = ref(-1);
 
                 async function List (){
                     var strUrl = "{% url 'list_chalenges' %}";
@@ -319,7 +310,7 @@
                             my_challenges.value = []
                         }else{
                             user_challenges.value = response.user_chalenges;
-                            my_challenges.value = user_challenges.value.filter(item => item.user.id == {{ request.user.id }});
+                            my_challenges.value = user_challenges.value;
                             
                         }
                 } 
@@ -442,7 +433,7 @@
                 })
 
                 return {
-                    challenges, Challenge, user_challenges, my_challenges, shareURL,index,
+                    challenges, Challenge, user_challenges, my_challenges, shareURL,
                     addChallenge, beforeJoin, joinChallenge, copyToClipboard, beforeLeave, leaveChallenge
                 };
             },

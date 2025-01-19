@@ -9,13 +9,34 @@ from .user_goal import *
 from .user_badge import *
 from GamifiedFittness.constants import *
 
+from django.forms.models import model_to_dict
+
+def serialize_user_activity(user_activity):
+    return {
+        'id': user_activity.id,
+        'effort': user_activity.effort,
+        'points': user_activity.points,
+        'calories': user_activity.calories,
+        'start_date': user_activity.start_date,
+        'activity': {
+            'id': user_activity.activity.id,
+            'name': user_activity.activity.name,
+            'calories': user_activity.activity.calories,
+            'points': user_activity.activity.points,
+            'unit': {
+                'id': user_activity.activity.unit.id,
+                'name': user_activity.activity.unit.name
+            }
+        },
+        'user': model_to_dict(user_activity.user, fields=['id', 'username', 'email']),
+    }
 
 @transaction.atomic
 def create_activity(user, activity_id, effort, start_date):
         # load activity
         activity = get_object_or_none(Activity, id=activity_id)
         if not activity:
-            return False
+            return {"success": False, "message": "Error Loading Activity"}
         # Create UserActivity instance
         try:
             user_activity = UserActivity.objects.create(
@@ -30,12 +51,12 @@ def create_activity(user, activity_id, effort, start_date):
         # Badge
         rslt = assign_badges(user)
         if not rslt.get("success", False):
-            return {"success": False, "message": rslt["message"]}
+            return {"success": False, "message": rslt.get("message", "error")}
 
         # Goal
         rslt = update_goal_progress(user, user_activity.calories)
         if not rslt.get("success", False):
-            return {"success": False, "message": rslt["message"]}
+            return {"success": False, "message": rslt.get("message", "error")}
 
         return {"success": True, "data": user_activity}
 

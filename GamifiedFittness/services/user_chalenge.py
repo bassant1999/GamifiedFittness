@@ -32,7 +32,6 @@ def edit_user_chalenge(user, challenge_id, progress):
         user_challenge.progress = progress
         user_challenge.points_earned = progress * challenge.points
         user_challenge.save()
-        print(user_challenge.progress)
     except Exception as e:
         return {"success": False, "message": "Could not be Updated"}   
     # Goal
@@ -40,7 +39,8 @@ def edit_user_chalenge(user, challenge_id, progress):
     added_calories = new_calories - old_calories
     rslt = update_goal_progress(user, added_calories)
     if not rslt.get("success", False):
-        return {"success": False, "message": rslt["message"]}
+        return {"success": False, "message": rslt.get("message", "error")}
+    
     return {"success": True, 'message': 'Updated successfully!'} 
 
 

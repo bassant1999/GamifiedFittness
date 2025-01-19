@@ -15,7 +15,10 @@ def add_first_activity_badge(user):
             if not first_activity_badge:
                 return {"success": False, "message": "First Activity Badge Not Found"}
             first_activity_user_badge = UserBadge(user=user, badge=first_activity_badge, date=now())
-            first_activity_user_badge.save()
+            try:
+                first_activity_user_badge.save()   
+            except Exception as e:
+                return {"success": False, "message": f"Error Adding Badge: {str(e)}"}
         
         return {"success": True, "message": "First Activity Badge Added Succesfully"}
 
@@ -27,13 +30,16 @@ def add_run_hundred_km_badge(user):
     if not running_activity:
         return {"success": False, "message": "Running Activitye Not Found"}
 
-    total_effort = UserActivity.objects.filter(activity=running_activity).aggregate(Sum('effort'))['effort__sum'] or 0
+    total_effort = UserActivity.objects.filter(user=user, activity=running_activity).aggregate(Sum('effort'))['effort__sum'] or 0
     if(total_effort >= 100):
         hundred_km_run_badge = get_object_or_none(Badge, id=BadgeType.RUN_HUNDRED_KM.value)
         if not hundred_km_run_badge:
             return {"success": False, "message": "Run Hundered Km Badge Not Found"}
         hundred_km_run_user_badge = UserBadge(user=user, badge=hundred_km_run_badge, date=now())
-        hundred_km_run_user_badge.save()
+        try:
+            hundred_km_run_user_badge.save()
+        except Exception as e:
+                return {"success": False, "message": f"Error Adding Badge: {str(e)}"}
 
     return {"success": True, "message": "Run Hundered Km Badge Added Succesfully"}
 
@@ -48,14 +54,7 @@ def assign_badges(user):
     for handler in BADGE_HANDLERS:
         result = handler(user)
         if not result.get("success", False):
-            return {"success": False, "message": result["message"]}
-    
-    # rslt = add_first_activity_badge(user)
-    # if not rslt.get('success'):
-    #     return {"success": False, "message": "Could not add First Activity badge"}
-    # rslt = add_run_hundred_km_badge(user)
-    # if not rslt.get('success'):
-    #     return {"success": False, "message": "Could not add First Activity badge"}
+            return {"success": False, "message": result.get("message", "error")}
     
     return {"success": True, "message": "Badges Added Succesfully"}
         

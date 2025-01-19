@@ -10,7 +10,8 @@ urlpatterns = [
     path("register", views.register, name="register"),
     ## Activity
     path("activities", views.list_activity_view, name="list_activity_view"),
-    # path("list_activity", views.list_activity, name="list_activity"),
+    path("list_activity", views.list_activity, name="list_activity"),
+    path("list_user_activity", views.list_user_activity, name="list_user_activity"),
     path("activities/add", views.add_activity, name="add_activity"),
     ## Chalenge
     path("chalenges", views.list_chalenge_view, name="list_chalenge_view"),
@@ -34,5 +35,8 @@ urlpatterns = [
     ## leaderboard
     path("leaderboard", views.leaderboard_view, name="leaderboard_view"),
     path("load_leaderboard", views.leaderboard, name="leaderboard"),
+    ## statistics
+    path("statistics", views.statistics_view, name="statistics_view"),
+
 
 ]

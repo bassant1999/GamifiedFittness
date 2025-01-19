@@ -96,18 +96,18 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card text-white bg-warning mb-3" style="max-width: 18rem;">
-                    <div class="card-header">Rank</div>
+                <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
+                    <div class="card-header">Activities</div>
                     <div class="card-body">
-                      <h5 class="card-title">10</h5>
+                      <h5 class="card-title">[[ activity_summary.count ]]</h5>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
-                    <div class="card-header">Activities</div>
+                <div class="card text-white bg-warning mb-3" style="max-width: 18rem;">
+                    <div class="card-header">Challenges</div>
                     <div class="card-body">
-                      <h5 class="card-title">[[activity_summary.count]]</h5>
+                      <h5 class="card-title">[[ challenge_summary.count ]]</h5>
                     </div>
                 </div>
             </div>
@@ -115,7 +115,7 @@
     </div>
 
     <div class="badges">
-        <div class="badge" title="[[user_badge.badge.description]]" v-for="user_badge in user_badges">
+        <div class="badge" :title="user_badge.badge.description" v-for="user_badge in user_badges">
             🏅 [[ user_badge.badge.name ]]
         </div>
     </div>
@@ -175,7 +175,7 @@
                             <h6> Total chalenges Number: <span class="text-body-secondary">[[challenge_summary.count]]</span> </h6>
                             <h6> Total Points: <span class="text-body-secondary">[[challenge_summary.total_points]]</span> </h6>
                         </div>
-                        <a href="#" class="card-link">Go to My Challenges</a>
+                        <a href="{% url 'list_chalenge_view' %}" class="card-link">Go to My Challenges</a>
                     </div>
                 </div>
             </div>
@@ -252,7 +252,7 @@
                         });
                     let response = await fetchResult.json();
                     if(!response.success){
-                        goal.value = [];
+                        goal.value = {};
                     }else{
                         goal.value = response.goal;
                     }
@@ -297,8 +297,6 @@
                         }else{
                             showSuccessMessage("response-message-update", "Successfully Updated the Goal!");
                             goal.value = response.goal
-                            // goal_add.value = {};
-
                         }
                 } 
 
@@ -447,6 +445,9 @@
         createApp(App).mount('#app');
     </script>
 {% endblock %}
+
+
+
 
 
 

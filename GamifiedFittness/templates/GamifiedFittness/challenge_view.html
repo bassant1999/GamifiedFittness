@@ -32,22 +32,18 @@
                     <div class="p-3 mb-3">
                         <div class="card-body">
                             <div class="d-flex flex-wrap gap-2">
-                                <!-- WhatsApp -->
                                 <a :href="'https://wa.me/?text='+[[ shareURL ]]" target="_blank" class="btn btn-success d-flex align-items-center gap-2">
                                     <i class="fab fa-whatsapp"></i> WhatsApp
                                 </a>
                     
-                                <!-- Twitter -->
                                 <a :href="'https://twitter.com/intent/tweet?url=' + [[ shareURL ]] + '&text=Share-Challenge'" target="_blank" class="btn btn-primary d-flex align-items-center gap-2">
                                     <i class="fab fa-twitter"></i> Twitter
                                 </a>
                     
-                                <!-- Facebook -->
                                 <a :href="'https://www.facebook.com/sharer/sharer.php?u='+ [[ shareURL ]]" target="_blank" class="btn btn-primary d-flex align-items-center gap-2" style="background-color: #1877F2;">
                                     <i class="fab fa-facebook"></i> Facebook
                                 </a>
                     
-                                <!-- Reddit -->
                                 <a :href="'https://reddit.com/submit?url='+ [[shareURL ]] + '&title=Chalenge'" target="_blank" class="btn btn-danger d-flex align-items-center gap-2">
                                     <i class="fab fa-reddit"></i> Reddit
                                 </a>
@@ -65,8 +61,6 @@
                             </div>
                         </div>
                     </div>
-
-                    
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary" @click="joinChallenge()">Save</button>
@@ -185,7 +179,7 @@
                 const user_challenge_progress = ref(0);
                 const csrftoken = '{{ csrf_token }}';
 
-                async function LoadChallenge(){
+                async function loadChallenge(){
                     var strUrl = "{% url 'load_chalenge' challenge_id %}";
   
                     let fetchResult = await fetch(strUrl, {
@@ -261,6 +255,7 @@
                         }else{
                             showSuccessMessage("response-message-leave", "Successfully Disconnected from the challenge!");
                             user_challenge.value = {};
+                            user_challenge_progress.value = 0;
                         }
                 } 
 
@@ -328,7 +323,7 @@
                 }
 
                 onMounted(() => {
-                    LoadChallenge();
+                    loadChallenge();
                     LoadUserChallenge();
                 })
 

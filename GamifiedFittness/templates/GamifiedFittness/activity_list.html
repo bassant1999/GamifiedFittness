@@ -6,7 +6,8 @@
 {% block header %} 
     <div class="d-flex align-items-center justify-content-between mb-3">
         <h1 class="header">My Activities</h1>
-        <button type="button" class="btn btn-outline-secondary m-lg-3" data-bs-toggle="modal" data-bs-target="#addActivity">
+        <button type="button" class="btn btn-outline-secondary m-lg-3"
+            @click="beforeAdd" data-bs-toggle="modal" data-bs-target="#addActivity">
             + Activity
         </button>
     </div>
@@ -24,36 +25,38 @@
                     <div id="response-message" class="alert d-none"></div>
 
                     <form id="activity-add-form">
-                        <!-- Activity Selection -->
                         <div class="mb-3">
                             <label for="activity" class="form-label">Activity</label>
-                            <select id="activity" name="activity" class="form-select" onchange="activityChange(this)" required>
-                                <option value="" disabled selected>Select an activity</option>
-                                {% for activity in activities %}
-                                    <option value="{{ activity.id }}" data-unit="{{ activity.unit.name }}">{{ activity.name }}</option>
-                                {% endfor %}
+                            <select id="activity" name="activity" class="form-select" v-model="activity.id" 
+                                @change="activityChange" required>
+                                <option value="0" disabled selected>Select an activity</option>
+                                    <option  v-for="activity in activities"
+                                        :value="activity?.id">
+                                        [[ activity?.name ]]
+                                    </option>
                             </select>
                         </div>
                 
-                        <!-- Effort Input -->
                         <div class="mb-3">
                             <label for="effort" class="form-label">Effort</label>
                             <div class="d-flex">
-                                <input type="number" id="effort" name="effort" class="form-control me-2" placeholder="Enter effort (e.g., minutes, meters, etc.)" required>
-                                <input type="text" id="unit" class="form-control d-none" style="width: fit-content;" disabled>
+                                <input type="number" id="effort" name="effort" class="form-control me-2"
+                                    v-model="activity.effort"  placeholder="Enter effort (e.g., minutes, meters, etc.)" required>
+                                <input type="text" id="unit" class="form-control" :value="unit?.name" style="width: fit-content;" disabled>
                             </div>
                         </div>
                 
                         <!-- Start Date -->
                         <div class="mb-3">
                             <label for="start_date" class="form-label">Start Date</label>
-                            <input type="date" id="start_date" name="start_date" class="form-control">
+                            <input type="date" id="start_date" name="start_date" v-model="activity.start_date" class="form-control">
                         </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary">Save</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
+                        
                     </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" @click="addActivity">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -65,166 +68,213 @@
     <div class="card m-4" style="width: 95%;">
         <h2 class="card-header">Filter</h2>
         <div class="card-body">
-            <form id="filter-activities-form" method="GET" action="{% url 'list_activity_view' %}">
+            <form id="filter-activities-form">
                 <div class="row">
-                    <!-- Name Filter -->
                     <div class="col-md-3">
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="filter[name]" 
-                                value="{{ filter.name }}" placeholder="Enter activity name">
+                            <input type="text" class="form-control" id="name" name="name" 
+                                v-model="filter.name" placeholder="Enter activity name">
                         </div>
                     </div>
-                    <!-- Date Filter -->
                     <div class="col-md-3">
                         <div class="mb-3">
                             <label for="date" class="form-label">Date</label>
-                            <input type="date" class="form-control" id="date" name="filter[date]" 
-                                value="{{ filter.date }}">
+                            <input type="date" class="form-control" id="date" name="date" 
+                                v-model="filter.date">
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-end">
-                    <div class="btn-group">
-                        <button type="submit" class="btn btn-primary">Filter</button>
-                        <button class="btn btn-danger" onclick="reset(event)"> Reset </button>
-                    </div>
-                </div>
             </form>
+            <div class="d-flex justify-content-end">
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary" @click="list">Filter</button>
+                    <button class="btn btn-danger" @click="reset"> Reset </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Filter Results -->
     <div class="border-light card m-4">
         <h2 class="card-header">Activities</h2>
-        {% if User_activities|length > 0 %}
-            <div class="card-body">
-                <div class="d-flex flex-wrap">
-                    {% for User_activity in User_activities %}
-                        <div class="card me-5 mb-5" style="width:fit-content">
-                            <div class="card-header d-flex align-items-center">
-                                <h4> 
-                                    {% if User_activity.activity.id == 1 %}
-                                        <i class="fas fa-running"></i>
-                                    {% elif User_activity.activity.id == 2 %}
-                                        <i class="fa-solid fa-person-digging"></i>
-                                    {% elif User_activity.activity.id == 3 %}
-                                        <i class="fas fa-biking"></i>
-                                    {% elif User_activity.activity.id == 4 %}
-                                        <i class="fa-solid fa-person-walking"></i>
-                                    {% else %}
-                                        <i class="fas fa-question-circle"></i>
-                                    {% endif %}
-                                    {{ User_activity.activity.name }} 
-                                </h4> 
-                                <span class="ms-3"> {{ User_activity.effort }} {{ User_activity.activity.unit.name }} </span>
-                            </div>
-                            <div class="card-body">
-                                <span class="me-5"><i class="fas fa-fire" style="color: gold;"></i> {{ User_activity.calories }} Cal</span>
-                                <span class="me-5"><i class="fas fa-star" style="color: gold;"></i> {{ User_activity.points }} Pts</span>
-                                <p class="card-text mt-4">
-                                    <small class="d-flex justify-content-end text-muted"> 
-                                        <i class="fa-calendar-alt fas me-1"></i>
-                                        {{ User_activity.start_date }} 
-                                    </small>
-                                </p>
-                            </div>
-                        </div>
-                    {% endfor %}
+        <div v-if="user_activities.length > 0" class="card-body">
+            <div class="d-flex flex-wrap">
+                <div class="card me-5 mb-5" style="width:fit-content" v-for="user_activity in user_activities">
+                    <div class="card-header d-flex align-items-center">
+                        <h4> 
+                            <span v-if="user_activity.activity.id == 1">
+                                <i class="fas fa-running"></i>
+                            </span>
+                            <span v-else-if="user_activity.activity.id == 2">
+                                <i class="fa fa-water"></i>
+                            </span>
+                            <span v-else-if="user_activity.activity.id == 3">
+                                <i class="fas fa-biking"></i>
+                            </span>
+                            <span v-else-if="user_activity.activity.id == 4">
+                                <i class="fa fa-walking"></i>
+                            </span>
+                            <span v-else>
+                                <i class="fas fa-question-circle"></i>
+                            </span>
+                            [[ user_activity.activity.name ]] 
+                        </h4> 
+                        <span class="ms-3"> [[ user_activity.effort ]] [[ user_activity.activity.unit.name ]] </span>
+                    </div>
+                    <div class="card-body">
+                        <span class="me-5"><i class="fas fa-fire" style="color: gold;"></i> [[ user_activity.calories ]] Cal</span>
+                        <span class="me-5"><i class="fas fa-star" style="color: gold;"></i> [[ user_activity.points ]] Pts</span>
+                        <p class="card-text mt-4">
+                            <small class="d-flex justify-content-end text-muted"> 
+                                <i class="fa-calendar-alt fas me-1"></i>
+                                [[ user_activity.start_date ]] 
+                            </small>
+                        </p>
+                    </div>
                 </div>
             </div>
-        {% else %}
-            <div class="alert alert-warning m" role="alert">
-                <i class="fa-solid fa-triangle-exclamation"></i> No Activities Yet
-            </div>
-        {% endif %}
+        </div>
+        <div v-else class="alert alert-warning m" role="alert">
+            <i class="fa-solid fa-triangle-exclamation"></i> No Activities Yet
+        </div>
     </div>
+
    
 {% endblock %}
 
+
 {% block script %}
-    <script>
+    <script type="module">
 
-        function activityChange(object) {
-            // Get the selected option element
-            const selectedOption = object.selectedOptions[0];
-            // update unit
-            if (selectedOption) {
-                const unit = document.getElementById('unit');
-                unit.value = selectedOption.dataset.unit;
-                unit.classList.remove('d-none');
-            }
-        }
+        const { createApp, ref, onMounted } = Vue;
 
-
-        function reset(event) {
-            event.preventDefault();
-            window.location.href = '{% url "list_activity_view" %}';
-        }
-
-
-        document.getElementById('activity-add-form').addEventListener('submit', async function (event) {
-            
-            event.preventDefault(); 
-
-            const form = event.target;
-            const formData = new FormData(form);
-            const responseMessage = document.getElementById('response-message');
-
-            try {
-                const response = await fetch("{% url 'add_activity' %}", {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: formData
+        const App = {
+            delimiters: ['[[', ']]'], // Change delimiters to avoid conflict
+            setup() {
+                const filter = ref({});
+                const user_activities = ref([]);
+                const activities = ref([]);
+                const activity =  ref({
+                    id: 0,
+                    effort: 0,
+                    start_date: ""
                 });
+                const unit = ref({});
+                const csrftoken = '{{ csrf_token }}';
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    responseMessage.classList.remove('d-none', 'alert-success');
-                    responseMessage.classList.add('alert-danger');
-                    responseMessage.innerText = data.error || 'An error occurred.';
+                async function list (){
+                    var strUrl = "{% url 'list_user_activity' %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ filter: filter.value })
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            user_activities.value = [];
+                        }else{
+                            user_activities.value = response.user_activities;
+                        }
                 } 
-                window.location.href = '{% url "list_activity_view" %}';
-            } catch (error) {
-                responseMessage.classList.remove('d-none', 'alert-success');
-                responseMessage.classList.add('alert-danger');
-                responseMessage.innerText = 'An unexpected error occurred.';
-                console.error('Error:', error);
-            }
-        });
+
+                async function listActivities (){
+                    var strUrl = "{% url 'list_activity' %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            activities.value = [];
+                        }else{
+                            activities.value = response.activities;
+                        }
+                } 
+
+
+                async function addActivity (){
+                    var strUrl = "{% url 'add_activity' %}";
+  
+                    let fetchResult = await fetch(strUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ activity: activity.value })
+                        });
+                        let response = await fetchResult.json();
+                        if(!response.success){
+                            showErrorMessage("response-message", response.message || "Failed to Add activity.");
+                        }else{
+                            showSuccessMessage("response-message", "Successfully Added the activity!");
+                            filter.value = {};
+                            list();
+                            activity.value = {
+                                id: 0,
+                                effort: 0,
+                                start_date: ""
+                            };
+                        }
+                } 
+
+                function reset() {
+                    filter.value = {}
+                    list()
+                }
+
+                function beforeAdd() {
+                    resetMessage("response-message");
+                }
+
+                function activityChange() {
+                    unit.value = activities.value.filter(item => item.id ==  activity.value.id)[0]?.unit;
+                }
+
+                function showSuccessMessage(responseMessageID, message) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.classList.remove("d-none", "alert-danger");
+                    responseMessage.classList.add("alert-success");
+                    responseMessage.textContent = message;
+                }
+
+                function showErrorMessage(responseMessageID, message) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.classList.remove("d-none", "alert-success");
+                    responseMessage.classList.add("alert-danger");
+                    responseMessage.textContent = message;
+                }
+
+                function resetMessage(responseMessageID) {
+                    const responseMessage = document.getElementById(responseMessageID);
+                    responseMessage.textContent = "";
+                    responseMessage.classList.remove("alert-success", "alert-danger");
+                    responseMessage.classList.add("d-none");
+                }
+
+                onMounted(() => {
+                    list();
+                    listActivities();
+                })
+
+                return {
+                    filter, user_activities, activities, activity, unit,
+                    list, reset, beforeAdd, activityChange, addActivity
+                };
+            },
+        };
+
+        // Initialize the Vue app and mount it to the DOM
+        createApp(App).mount('#app');
     </script>
+
 {% endblock %}
-
-<div id="activityContainer"></div>
-
-<!-- <script>
-    const activities = {{ activities|safe }};
-    const icons = {
-        running: '<i class="fas fa-running"></i>',
-        cycling: '<i class="fas fa-biking"></i>',
-        swimming: '<i class="fas fa-swimmer"></i>',
-        yoga: '<i class="fas fa-spa"></i>',
-        default: '<i class="fas fa-question-circle"></i>'
-    };
-
-    const activityContainer = document.getElementById('activityContainer');
-    activities.forEach(activity => {
-        const icon = icons[activity.type] || icons.default;
-        const card = `
-            <div class="card" style="width: 95%; margin: 10px 0;">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">${icon} ${activity.name}</h4>
-                    <span>${activity.duration}</span>
-                </div>
-                <div class="card-body">
-                    <i class="fas fa-fire"></i> ${activity.calories} Calories
-                    <i class="fas fa-star"></i> ${activity.points} Points
-                </div>
-            </div>`;
-        activityContainer.innerHTML += card;
-    });
-</script> -->

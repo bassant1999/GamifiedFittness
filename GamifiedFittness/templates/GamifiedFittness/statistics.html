@@ -1,0 +1,130 @@
+{% extends "GamifiedFittness/layout.html" %}
+
+
+{% block body %}
+
+ <div>
+    <canvas id="stats_chart"></canvas>
+ </div>
+
+
+<div>
+    <div class="me-5 ms-5 table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th scope="col">Activity</th>
+                <th scope="col">Count</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for stats in statistics %}
+                    <tr>
+                        <td>{{stats.Activity}}</td>
+
+                        <td>{{stats.Count}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+<script type="module">
+
+const { createApp, ref, onMounted } = Vue;
+
+const App = {
+    delimiters: ['[[', ']]'], // Change delimiters to avoid conflict
+    setup() {
+        const stats = {{ statistics|safe }};
+
+
+        function renderChart(canvasId, labels, points, calories, title) {
+                    
+            if(labels.length == 0) {
+                    labels = ['No Data'];
+                }
+            if(points.length == 0) {
+                points = [0];
+            }
+            if(calories.length == 0) {
+                calories = [0];
+            }    
+
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: title,
+                        data: points,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        fill: true,
+                        yAxisID: 'y'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Points'
+                            },
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        onMounted(async() => {
+            // Activity Summary Chart
+            renderChart(
+                'stats_chart',
+                stats.map(item => item.Activity),
+                stats.map(item => item.Count),
+                stats.map(item => item.Count),
+                'Activity Count'
+            );
+        
+        })
+
+
+        return {
+        };
+    },
+};
+
+// Initialize the Vue app and mount it to the DOM
+createApp(App).mount('#app');
+                
+</script>
+{% endblock %}
+
+
